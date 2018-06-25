@@ -14,15 +14,5 @@ app.listen(app.get('port'), () => {
     console.log('server listen on port 3000');
 });
 
-app.set('port', process.env.PORT || 3000);
-
-let socketServer = io.listen(9999, {
-    "log level": 1
-});
-
-//let socketServer = io.listen(9999, {
-//    "log level": 1
-//});
-
-//
-require('./routes')(socketServer);
+//enviar al router
+require('./routes/serverRoutes')(app);
