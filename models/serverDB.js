@@ -239,4 +239,65 @@ db.getEventById = (id_event, cb) => {
 
 };
 
+db.getImgsEventsByIdEvent = (id_event, cb) => {
+
+    if (conn) {
+        let sql = 'SELECT path ' +
+            'FROM event_img WHERE id_event = :id_event';
+        conn.query(sql, {
+            id_event: id_event
+        }, (err, rows) => {
+            if (err) {
+                cb(err, null);
+            } else {
+                cb(null, rows);
+            }
+        });
+    } else {
+        cb('Conexion inexistente', null);
+    }
+
+
+};
+
+db.getImgsEventsByIdEvent = (id_event, cb) => {
+
+    if (conn) {
+        let sql = 'SELECT path ' +
+            'FROM event_img WHERE id_event = :id_event';
+        conn.query(sql, {
+            id_event: id_event
+        }, (err, rows) => {
+            if (err) {
+                cb(err, null);
+            } else {
+                cb(null, rows);
+            }
+        });
+    } else {
+        cb('Conexion inexistente', null);
+    }
+
+};
+
+db.getUsersForDetailEvent = (id_event, cb) => {
+
+    if (conn) {
+        let sql = 'SELECT u.id_user, u.name, u.img ' +
+            'FROM event_img WHERE id_event = :id_event';
+        conn.query(sql, {
+            id_event: id_event
+        }, (err, rows) => {
+            if (err) {
+                cb(err, null);
+            } else {
+                cb(null, rows);
+            }
+        });
+    } else {
+        cb('Conexion inexistente', null);
+    }
+
+};
+
 module.exports = db;

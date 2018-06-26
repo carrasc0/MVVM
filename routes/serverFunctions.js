@@ -269,10 +269,27 @@ fc.getDataEdit = function (req, res, next) {
 
 fc.getEventById = function (req, res, next) {
 
-let id_event = req.body.id_event;
-let id_user = req.body.id_user;
+    let id_event = req.body.id_event;
+    let id_user = req.body.id_user;
 
+    //evento
+    db.getEventById(id_event, (err, data) => {
+        if (err) {
+            next();
+        } else {
+            //imagenes del evento
+            db.getImgsEventsByIdEvent(id_event, (err, dataImg) => {
+                if (err) {
+                    next();
+                } else {
+                    //usuarios match que les interese el evento
 
+                }
+
+            });
+        }
+
+    });
 
 };
 
