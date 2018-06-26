@@ -1,4 +1,4 @@
-const DB = require('../models/serverDB');
+const db = require('../models/serverDB');
 
 module.exports = function (app) {
 
@@ -7,6 +7,4 @@ module.exports = function (app) {
             error: false
         });
     });
-
-
-};
+}; 
