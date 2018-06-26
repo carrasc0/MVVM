@@ -1,4 +1,4 @@
-module.exports = function (controllers, io) {
+module.exports = function (io) {
     // Initialize a new socket.io application, named 'chat'
     let chat = io.on('connection', function (socket) {
         let address = socket.handshake.address;
@@ -21,21 +21,10 @@ module.exports = function (controllers, io) {
          * el resultado es el mismo que el anterior, imprimir los datos del usuario
          */
         socket.on('user', function (data, fn) {
-            controllers.users[data.func](data.params, chat, socket, fn);
+            routes.chatFunction[data.func](data.params, chat, socket, fn);
             console.log(data);
         });
-        /*
-         * Solo maneja el evento para cuando un usuario esta escribiendo un sms
-         * notificarle al otro usuario que fulano is typing
-         */
-        socket.on("typing", function (data) {
-            if (typeof data !== "undefined" && typeof data.sender !== "undefined")
-                io.in(data.username).emit("isTyping", {
-                    isTyping: data.typing,
-                    sender: data.sender,
-                    username: data.username
-                });
-        });
+
     });
 
 };
