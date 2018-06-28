@@ -21,6 +21,6 @@ const socketServer = io.listen(8000, () => {
     console.log('serverSocket listen on port 8000');
 });
 
-//enviar al router
+//enviar al router update
 require('./routes/serverRoutes')(app);
 require('./routes/chat')(socketServer);

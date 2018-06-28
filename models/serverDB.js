@@ -260,11 +260,13 @@ db.getImgsEventsByIdEvent = (id_event, cb) => {
 
 };
 
-db.getUsersForDetailEvent = (id_event, cb) => {
+db.getUsersForDetailEvent = (data, cb) => {
 
     if (conn) {
         let sql = 'SELECT u.id_user, u.name, u.img ' +
-            'FROM user u WHERE id_event = :id_event';
+            'FROM user u, user_event_inter uei, flech f WHERE ' + 
+            '(uei.id_event = :id_event && uei.id_user = f.) AND ' + 
+            '(f.user_from)';
         conn.query(sql, {
             id_event: id_event
         }, (err, rows) => {
