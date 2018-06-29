@@ -1,6 +1,16 @@
 "use strict";
 let Utils = {};
 
+// Converts from degrees to radians.
+Math.radians = function (degrees) {
+    return degrees * Math.PI / 180;
+};
+
+// Converts from radians to degrees.
+Math.degrees = function (radians) {
+    return radians * 180 / Math.PI;
+};
+
 Utils.getDistanciaEntreDosPuntos = function (lat1, lng1, lat2, lng2) {
 
     let earthRadius = 6371; // km
@@ -21,8 +31,8 @@ Utils.getBoundaries = function (lat, lng, distance) {
 
     let cardinalCoords = new Array("0" /*north*/ , "180" /*south*/ , "90" /*east*/ , "270" /*west*/ );
 
-    let rLat = lat.toRad;
-    let rLng = lng.toRad;
+    let rLat = Math.radians(lat);
+    let rLng = Math.radians(lat);
     let rAngDist = distance / 6371;
 
     cardinalCoords.forEach((angle, index) => {
@@ -31,8 +41,8 @@ Utils.getBoundaries = function (lat, lng, distance) {
         let rLatB = Math.asin(Math.sin(rLat) * Math.cos(rAngDist) + Math.cos(rLat) * Math.sin(rAngDist) * Math.cos(rAngle));
         let rLngB = rLng + Math.atan2(Math.sin(rAngle) * Math.sin(rAngDist) * Math.cos(rLat), Math.cos(rAngDist) - Math.sin(rLat) * Math.sin(rLatB));
 
-        let returnCoordLat = new Array("lat" + index, rLat.toRad /*aqui va al reves de toRad (rad2deg)*/ );
-        let returnCoordLng = new Array("lng" + index, rLng.toRad /*aqui va al reves de toRad (rad2deg)*/ );
+        let returnCoordLat = new Array("lat" + index, Math.degrees(rLat) /*aqui va al reves de toRad (rad2deg)*/ );
+        let returnCoordLng = new Array("lng" + index, Math.degrees(rLng) /*aqui va al reves de toRad (rad2deg)*/ );
 
         returnData.push(returnCoordLat, returnCoordLng);
 

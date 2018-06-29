@@ -35,7 +35,7 @@ module.exports = function (app) {
 
     //UPDATE
 
-    pp.post('/updateLocation', fc.updateLocation);
+    app.post('/updateLocation', fc.updateLocation);
 
     app.post('/updateRewind', fc.updateRewind);
 
