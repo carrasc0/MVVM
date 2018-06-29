@@ -2,6 +2,8 @@ const db = require('../models/serverDB');
 const utils = require('../utils/utils');
 const fc = {};
 
+//LOGIN
+
 fc.loginFacebook = function (req, res, next) {
 
     let fb_id = req.body.fb_id;
@@ -66,6 +68,8 @@ fc.addUserGoogle = function (req, res, next) {
     });
 };
 
+//ADD
+
 fc.addRecord = function (req, res, next) {
 
     let user_from = req.body.user_from;
@@ -91,6 +95,8 @@ fc.addRecord = function (req, res, next) {
     });
 
 };
+
+//GET
 
 fc.getMatches = function (req, res, next) {
 
@@ -386,6 +392,151 @@ fc.getPeople = function (req, res, next) {
             }
         })
     }
+
+};
+
+fc.getImgsUser = function (req, res, next) {
+
+    let id_user = req.body.id_user;
+
+    db.getImgsUser(id_user, (err, data) => {
+        if (err) {
+            next();
+        } else {
+            res.json({
+                img: data[0].img,
+                imgs: data
+            });
+        }
+
+    });
+
+};
+
+//UPDATE
+
+fc.updateLocation = function (req, res, next) {
+
+    let id_user = req.body.id_user;
+    let lat = req.body.lat;
+    let lng = req.body.lng;
+
+    let dataLocation = {
+        lat,
+        lng,
+        id_user
+    };
+
+    db.updateLocation(dataLocation, (err, data) => {
+        if (err) {
+            next();
+        } else {
+            res.json({
+                error: false
+            });
+        }
+    });
+
+};
+
+fc.updateRewind = function (req, res, next) {
+
+    let user_from = req.body.user_from;
+    let user_to = req.body.user_to;
+
+    let dataRewind = {
+        user_from,
+        user_to
+    };
+
+    db.updateRewind(dataRewind, (err, data) => {
+        if (err) {
+            next();
+        } else {
+            res.json({
+                error: false
+            });
+        }
+    });
+
+};
+
+fc.updateSettings = function (req, res, next) {
+
+    let id_user = req.body.id_user;
+    let min_age = req.body.min_age;
+    let max_age = req.body.max_age;
+    let sex_pref = req.body.sex_pref;
+
+    let dataSettings = {
+        min_age,
+        max_age,
+        sex_pref,
+        id_user
+    };
+
+    db.updateSettings(dataSettings, (err, data) => {
+        if (err) {
+            next();
+        } else {
+            db.getDataAfterUpdateSettings(id_user, (err, data) => {
+                if (err) {
+                    next();
+                } else {
+                    res.json({
+                        error: false,
+                        min_age: data[0].min_age,
+                        max_age: data[0].max_age,
+                        sex_pref: data[0].sex_pref
+                    })
+                }
+
+            });
+        }
+
+    });
+
+};
+
+fc.updateDataEdit = function (req, res, next) {
+
+    let id_user = req.body.id_user;
+    let prof = req.body.prof;
+    let ocup = req.body.ocup;
+    let iam = req.body.iam;
+    let enjoy = req.body.enjoy;
+    let partner = req.body.partner;
+
+    let dataEdit = {
+        prof,
+        ocup,
+        iam,
+        enjoy,
+        partner,
+        id_user
+    };
+
+    db.updateEdit(dataEdit, (err, data) => {
+        if (err) {
+            next();
+        } else {
+            db.getDataAfterUpdateEdit(id_user, (err, data) => {
+                if (err) {
+                    next();
+                } else {
+                    res.json({
+                        prof: data[0].prof,
+                        ocup: data[0].ocup,
+                        iam: data[0].iam,
+                        enjoy: data[0].enjoy,
+                        partner: data[0].partner
+                    })
+                }
+
+            });
+        }
+
+    });
 
 };
 

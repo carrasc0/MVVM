@@ -239,7 +239,6 @@ db.getEventById = (id_event, cb) => {
 
 };
 
-
 db.getImgsEventsByIdEvent = (id_event, cb) => {
 
     if (conn) {
@@ -358,5 +357,155 @@ db.getPeople = (data, cb) => {
     }
 
 };
+
+db.getImgsUser = (id_user, cb) => {
+
+    if (conn) {
+        let sql = 'SELECT u.id_user, u.img, ui.id_user_img, ui.path FROM user u, user_img ui ' +
+            'WHERE (ui.id_user = :id_user) AND (u.id_user = :id_user)';
+        conn.query(sql, {
+            id_user: id_user
+        }, (err, rows) => {
+            if (err) {
+                cb(err, null);
+            } else {
+                cb(null, rows);
+            }
+        });
+    } else {
+        cb('Conexion inexistente', null);
+    }
+
+};
+
+db.getDataAfterUpdateSettings = (id_user, cb) => {
+
+    if (conn) {
+        let sql = 'SELECT min_age, max_age, sex_pref FROM user ' +
+            'WHERE id_user = :id_user';
+        conn.query(sql, {
+            id_user: id_user
+        }, (err, rows) => {
+            if (err) {
+                cb(err, null);
+            } else {
+                cb(null, rows);
+            }
+        });
+    } else {
+        cb('Conexion inexistente', null);
+    }
+
+};
+
+db.getDataAfterUpdateEdit = (id_user, cb) => {
+
+    if (conn) {
+        let sql = 'SELECT u.prof, u.ocup, ud.iam, ud.enjoy, ud.partner ' +
+            'FROM user u, user_data ud WHERE (u.id_user = :id_user) AND (ud.id_user = :id_user)';
+        conn.query(sql, {
+            id_user: id_user
+        }, (err, rows) => {
+            if (err) {
+                cb(err, null);
+            } else {
+                cb(null, rows);
+            }
+        });
+    } else {
+        cb('Conexion inexistente', null);
+    }
+
+};
+
+//UPDATE
+
+db.updateLocation = (data, cb) => {
+
+    if (conn) {
+        let sql = 'DELETE from record WHERE user_from = :user_from AND user_to = :user_to';
+        conn.query(sql, {
+            user_from: data.user_from,
+            user_to: data.user_to
+        }, (err, rows) => {
+            if (err) {
+                cb(err, null);
+            } else {
+                cb(null, rows);
+            }
+        });
+    } else {
+        cb('Conexion inexistente', null);
+    }
+
+};
+
+db.updateRewind = (data, cb) => {
+
+    if (conn) {
+        let sql = 'DELETE from record WHERE user_from = :user_from AND user_to = :user_to';
+        conn.query(sql, {
+            user_from: data.user_from,
+            user_to: data.user_to
+        }, (err, rows) => {
+            if (err) {
+                cb(err, null);
+            } else {
+                cb(null, rows);
+            }
+        });
+    } else {
+        cb('Conexion inexistente', null);
+    }
+
+};
+
+db.updateSettings = (data, cb) => {
+
+    if (conn) {
+        let sql = 'UPDATE user SET min_age = :min_age, max_age = :max_age, sex_pref = :sex_pref ' +
+            'WHERE id_user = :id_user';
+        conn.query(sql, {
+            min_age: data.min_age,
+            max_age: data.max_age,
+            id_user: data.id_user
+        }, (err, rows) => {
+            if (err) {
+                cb(err, null);
+            } else {
+                cb(null, rows);
+            }
+        });
+    } else {
+        cb('Conexion inexistente', null);
+    }
+
+};
+
+db.updateEdit = (data, cb) => {
+
+    if (conn) {
+        let sql = 'UPDATE user u, user_data ud SET u.prof = :prof, u.ocup = :ocup, ' +
+            'ud.iam = :iam, ud.enjoy = :enjoy, ud.partner = :partner ' +
+            'WHERE (u.id_user = :id_user) AND (ud.id_user = :id_user)';
+        conn.query(sql, {
+            prof: data.prof,
+            ocup: data.ocup,
+            iam: data.iam,
+            enjoy: data.enjoy,
+            partner: data.partner
+        }, (err, rows) => {
+            if (err) {
+                cb(err, null);
+            } else {
+                cb(null, rows);
+            }
+        });
+    } else {
+        cb('Conexion inexistente', null);
+    }
+
+};
+
 
 module.exports = db;

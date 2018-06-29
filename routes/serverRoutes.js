@@ -13,6 +13,9 @@ module.exports = function (app) {
 
     app.post('/addUserGoogle', fc.addUserGoogle);
 
+    //ADD
+
+    app.post('/addRecord', fc.addRecord);
 
     //GET
 
@@ -28,6 +31,17 @@ module.exports = function (app) {
 
     app.post('/getPeople', fc.getPeople);
 
+    app.post('/getImgsUser', fc.getImgsUser);
+
+    //UPDATE
+
+    pp.post('/updateLocation', fc.updateLocation);
+
+    app.post('/updateRewind', fc.updateRewind);
+
+    app.post('/updateSettings', fc.updateSettings);
+
+    app.post('/updateDataEdit', fc.updateDataEdit);
 
 
 };
