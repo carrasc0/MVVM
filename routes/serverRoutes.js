@@ -26,6 +26,8 @@ module.exports = function (app) {
 
     app.post('/getEventById', fc.getEventById);
 
+    app.post('/getPeople', fc.getPeople);
+
 
 
 };

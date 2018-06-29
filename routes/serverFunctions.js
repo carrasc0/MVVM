@@ -1,4 +1,5 @@
 const db = require('../models/serverDB');
+const utils = require('../utils/utils');
 const fc = {};
 
 fc.loginFacebook = function (req, res, next) {
@@ -283,7 +284,23 @@ fc.getEventById = function (req, res, next) {
                     next();
                 } else {
                     //usuarios match que les interese el evento
+                    let dataUsers = {
+                        id_event,
+                        id_user
+                    };
+                    db.getUsersForDetailEvent(dataUsers, (err, dataUsers) => {
+                        if (err) {
+                            next();
+                        } else {
+                            //enviado peticion
+                            res.json({
+                                event: data[0],
+                                imgs: dataImg,
+                                users: dataUsers
+                            })
+                        }
 
+                    });
                 }
 
             });
@@ -293,5 +310,83 @@ fc.getEventById = function (req, res, next) {
 
 };
 
+fc.getPeople = function (req, res, next) {
+
+    let id_user = req.body.id_user;
+    let lat = req.body.lat;
+    let lng = req.body.lng;
+    let sex = req.body.sex;
+    let sex_pref = req.body.sex_pref;
+    let min_age = req.body.min_age;
+    let max_age = req.body.max_age;
+
+    if (lat) {
+        //trabajar online
+
+        let returnData = Array();
+
+        for (let i = 100; i < 700; i += 200) {
+
+            let box = utils.getBoundaries(lat, lng, i);
+            let dataPeople = {
+                lat,
+                lng,
+                id_user,
+                min_age,
+                max_age,
+                sex,
+                sex_pref,
+                box
+            }
+
+            db.getPeopleWithCoordinates(dataPeople, (err, data) => {
+                if (err) {
+                    next();
+                } else {
+                    returnData.push(data);
+                }
+            });
+
+            if (returnData > 8) {
+                res.json({
+                    exists: true,
+                    users: returnData
+                });
+            }
+
+        }
+
+    } else {
+        //trabajar offline
+        let dataPeople = {
+            lat,
+            lng,
+            id_user,
+            min_age,
+            max_age,
+            sex,
+            sex_pref,
+            box
+        }
+        db.getPeople(dataPeople, (err, data) => {
+            if (err) {
+                next();
+            } else {
+                if (data.lenght > 0) {
+                    res.json({
+                        exists: true,
+                        users: data
+                    });
+                } else {
+                    res.json({
+                        exists: false,
+                        users: new Array()
+                    })
+                }
+            }
+        })
+    }
+
+};
 
 module.exports = fc;

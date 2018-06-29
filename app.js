@@ -1,3 +1,4 @@
+const utils = require('./utils/utils');
 const express = require('express'),
     app = express(),
     server = require('http').createServer(app),
@@ -24,3 +25,5 @@ const socketServer = io.listen(8000, () => {
 //enviar al router update
 require('./routes/serverRoutes')(app);
 require('./routes/chat')(socketServer);
+
+//console.log(utils.getBoundaries('4.6665578', '-74.0524521', 2));
