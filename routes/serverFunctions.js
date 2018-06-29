@@ -439,6 +439,28 @@ fc.updateLocation = function (req, res, next) {
 
 };
 
+fc.updateUserStatus = function (req, res, next) {
+
+    let id_user = req.body.id_user;
+    let status = req.body.status;
+
+    let dataStatus = {
+        status,
+        id_user
+    };
+
+    db.updateUserStatus(dataStatus, (err, data) => {
+        if (err) {
+            next();
+        } else {
+            res.json({
+                error: false
+            });
+        }
+    });
+
+};
+
 fc.updateRewind = function (req, res, next) {
 
     let user_from = req.body.user_from;

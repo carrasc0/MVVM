@@ -37,6 +37,8 @@ module.exports = function (app) {
 
     app.post('/updateLocation', fc.updateLocation);
 
+    app.post('/updateUserStatus', fc.updateUserStatus);
+
     app.post('/updateRewind', fc.updateRewind);
 
     app.post('/updateSettings', fc.updateSettings);

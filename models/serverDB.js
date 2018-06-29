@@ -422,11 +422,38 @@ db.getDataAfterUpdateEdit = (id_user, cb) => {
 
 db.updateLocation = (data, cb) => {
 
+    /*SET @g = ST_GeomFromText('POINT(1 1)');
+    INSERT INTO geom VALUES (@g);*/
+
+    /*INSERT INTO geom VALUES (ST_GeomFromText('POINT(1 1)'));
+    SET @g = 'POINT(1 1)';
+    INSERT INTO geom VALUES (ST_GeomFromText(@g));*/
+    
     if (conn) {
-        let sql = 'DELETE from record WHERE user_from = :user_from AND user_to = :user_to';
+        let geo = 'ST_GeomFromText(' + data.lat + ' ' + data.lng + ')';
+        let sql = 'UPDATE user SET location = ' + geo + ' WHERE id_user = :id_user';
         conn.query(sql, {
-            user_from: data.user_from,
-            user_to: data.user_to
+            id_user: data.id_user
+        }, (err, rows) => {
+            if (err) {
+                cb(err, null);
+            } else {
+                cb(null, rows);
+            }
+        });
+    } else {
+        cb('Conexion inexistente', null);
+    }
+
+};
+
+db.updateUserStatus = (data, cb) => {
+
+    if (conn) {
+        let sql = 'UPDATE FROM user SET status = :status WHERE id_user = :id_user';
+        conn.query(sql, {
+            status: data.status,
+            id_user: data.id_user
         }, (err, rows) => {
             if (err) {
                 cb(err, null);
