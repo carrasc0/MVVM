@@ -107,12 +107,43 @@ fcChat.addNewMsg = function (data, socket, next) {
 
 };
 
-fcChat.getMsgsWithoutReadForUser = function (data, socket, next) {
+fcChat.getMsgsWithoutReadForSender = function (data, socket, next) {
 
+    let params = JSON.stringify(data.params);
+    let sender = params.sender;
+
+    db.getMsgsWithoutReadForSender(sender, (err, data) => {
+        if (err) {
+            next(err);
+        } else {
+            let returnData = {
+                count: data[0].count
+            };
+            next(returnData);
+        }
+    });
 };
 
 fcChat.getMsgsWithoutReadBetweenTwoUsers = function (data, socket, next) {
 
+    let params = JSON.stringify(data.params);
+    let sender = params.sender;
+    let nickname = params.nickname;
+
+    let dataBetween = {
+        sender,
+        nickname
+    };
+    db.getMsgsWithoutReadBetweenTwoUsers(dataBetween, (err, data) => {
+        if (err) {
+            next(err);
+        } else {
+            let returnData = {
+                count: data[0].count
+            };
+            next(returnData);
+        }
+    });
 };
 
 module.exports = fcChat;

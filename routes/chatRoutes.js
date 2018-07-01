@@ -15,7 +15,7 @@ module.exports = function (io) {
 
         socket.on("addNewMsg", chF.addNewMsg);
 
-        socket.on("getMsgsWithoutReadForUser", chF.getMsgsWithoutReadForUser);
+        socket.on("getMsgsWithoutReadForSender", chF.getMsgsWithoutReadForSender);
 
         socket.on("getMsgsWithoutReadBetweenTwoUsers", chF.getMsgsWithoutReadBetweenTwoUsers);
 
