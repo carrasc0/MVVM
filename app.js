@@ -24,6 +24,6 @@ const socketServer = io.listen(8000, () => {
 
 //enviar al router update
 require('./routes/serverRoutes')(app);
-require('./routes/chat')(socketServer);
+require('./routes/chatRoutes')(socketServer);
 
 console.log(utils.getBoundaries('4.6665578', '-74.0524521', 2));

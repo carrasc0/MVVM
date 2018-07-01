@@ -288,7 +288,7 @@ db.getPeopleWithCoordinates = (data, cb) => {
     if (conn) {
 
         let sql = `SELECT id_user, name, img, TIMESTAMPDIFF(YEAR,date_b,CURDATE()) AS age, prof, ocup ' +
-            '(6371 * ACOS(SIN(RADIANS(ST_X(LOCATION))) * SIN(RADIANS(:lat)) + COS(RADIANS(ST_Y(location) - :lng)) ' +
+            '(6371 * ACOS(SIN(RADIANS(ST_X(location))) * SIN(RADIANS(:lat)) + COS(RADIANS(ST_Y(location) - :lng)) ' +
             '* COS(RADIANS(ST_X(location))) * COS(RADIANS(:lat))))) as distance ' +
             'FROM user WHERE ' +
             '(id_user != :id_user) AND ' +
@@ -428,7 +428,7 @@ db.updateLocation = (data, cb) => {
     /*INSERT INTO geom VALUES (ST_GeomFromText('POINT(1 1)'));
     SET @g = 'POINT(1 1)';
     INSERT INTO geom VALUES (ST_GeomFromText(@g));*/
-    
+
     if (conn) {
         let geo = 'ST_GeomFromText(' + data.lat + ' ' + data.lng + ')';
         let sql = 'UPDATE user SET location = ' + geo + ' WHERE id_user = :id_user';
@@ -534,5 +534,80 @@ db.updateEdit = (data, cb) => {
 
 };
 
+//CHAT
+
+db.openTalk = (data, cb) => {
+
+    if (conn) {
+        let sql = 'SELECT id_chat, created_at, date, sender, nickname, body, readed FROM chat_logs ' +
+            /*Si el mensaje lo envia el usuario actual, se verifica la disponibilidad*/
+            'WHERE (sender = :sender && nickname = :nickname && av_s = 1) OR' +
+            /*Si el mensaje ha sido enviado al usuario actual, no se verifica la disponibilidad*/
+            '(sender = :nickname && nickname = :sender) LIMIT 40';
+        conn.query(sql, {
+            sender: data.sender,
+            nickname: data.nickname
+        }, (err, rows) => {
+            if (err) {
+                cb(err, null);
+            } else {
+                cb(null, rows);
+            }
+        });
+    } else {
+        cb('Conexion inexistente', null);
+    }
+
+};
+
+db.upChatScroll = (data, cb) => {
+
+    if (conn) {
+        let sql = 'SELECT id_chat, created_at, date, sender, nickname, body, readed FROM chat_logs ' +
+            /*Si el mensaje lo envia el usuario actual, se verifica la disponibilidad*/
+            'WHERE ((sender = :sender && nickname = :nickname && av_s = 1) OR' +
+            /*Si el mensaje ha sido enviado al usuario actual, no se verifica la disponibilidad*/
+            '(sender = :nickname && nickname = :sender)) AND (id_chat > :id_chat) LIMIT 40';
+        conn.query(sql, {
+            sender: data.sender,
+            nickname: data.nickname,
+            id_chat: data.id_chat
+        }, (err, rows) => {
+            if (err) {
+                cb(err, null);
+            } else {
+                cb(null, rows);
+            }
+        });
+    } else {
+        cb('Conexion inexistente', null);
+    }
+
+};
+
+db.existsMoreMsgs = (data, cb) => {
+
+    if (conn) {
+        let sql = 'SELECT COUNT(*) as count FROM chat_logs ' +
+            /*Si el mensaje lo envia el usuario actual, se verifica la disponibilidad*/
+            'WHERE ((sender = :sender && nickname = :nickname && av_s = 1) OR' +
+            /*Si el mensaje ha sido enviado al usuario actual, no se verifica la disponibilidad*/
+            '(sender = :nickname && nickname = :sender)) AND id_chat > :id_chat LIMIT 40';
+        conn.query(sql, {
+            sender: data.sender,
+            nickname: data.nickname,
+            id_chat: data.id_chat
+        }, (err, rows) => {
+            if (err) {
+                cb(err, null);
+            } else {
+                cb(null, rows);
+            }
+        });
+    } else {
+        cb('Conexion inexistente', null);
+    }
+
+};
 
 module.exports = db;
