@@ -1,14 +1,15 @@
 const fcChat = {};
 const db = require('../models/serverDB');
+const utils = require('../utils/utils');
 
 /*funciones para el chat
-open Talk
-upScroll chat
-remove msgs
-remove msg
-add msg ()
-get msgs sin leer del usuario
-get msgs sin leer entre dos usuarios
+open Talk (DONE)
+upScroll chat (DONE)
+remove msgs (DONE)
+remove msg (DONE)
+add msg (DONE)
+get msgs sin leer del usuario (DONE)
+get msgs sin leer entre dos usuarios (DONE)
 
 */
 
@@ -96,6 +97,33 @@ fcChat.removeMsg = function (data, socket, next) {
 
 fcChat.removeMsgs = function (data, socket, next) {
 
+    let listMsgs = JSON.stringify(data.msgs);
+
+    listMsgs.forEach(msg => {
+
+        if (utils.isSender(msg.sender, msg.id_user)) {
+            db.disableAvSender(msg.id_chat, (err, data) => {
+                if (err) {
+                    next(err);
+                } else {
+                    console.log('result of disable AV Sender: ' + data);
+                }
+            });
+        } else {
+            db.disableAvNickname(msg.id_chat, (err, data) => {
+                if (err) {
+                    next(err);
+                } else {
+                    console.log('result of disable AV Sender: ' + data);
+                }
+            });
+        }
+
+    });
+    let returnData = {
+        error: false
+    }
+    next(returnData);
 };
 
 fcChat.addNewMsg = function (data, socket, next) {
@@ -104,6 +132,24 @@ fcChat.addNewMsg = function (data, socket, next) {
     let sender = params.sender;
     let nickname = params.nickname;
     let body = params.body;
+
+    let dataMsg = {
+        sender,
+        nickname,
+        body
+    };
+
+    db.addNewMsg(dataMsg, (err, data) => {
+        if (err) {
+            next(err);
+        } else {
+            let dataReturn = {
+                id_chat: data.insertId,
+                body: body
+            };
+            next(dataReturn);
+        }
+    });
 
 };
 

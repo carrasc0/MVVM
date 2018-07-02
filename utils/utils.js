@@ -52,6 +52,9 @@ Utils.getBoundaries = function (lat, lng, distance) {
 
 }
 
+Utils.isSender = function (sender, id_user) {
+    return parseInt(sender) === parseInt(id_user);
+};
 
 
 module.exports = Utils;
