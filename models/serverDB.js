@@ -61,6 +61,27 @@ db.addRecord = (data, cb) => {
 
 };
 
+db.addImgUser = (data, cb) => {
+    if (conn) {
+        let sql = 'INSERT INTO user_img (path, pos, id_user) ' +
+            'VALUES (:path, :pos, :id_user)';
+        conn.query(sql, {
+            path: data.path,
+            pos: data.pos,
+            id_user: data.id_user
+        }, (err, rows) => {
+            if (err) {
+                cb(err, null);
+            } else {
+                cb(null, rows);
+            }
+        });
+    } else {
+        cb('Conexion inexistente', null);
+    }
+
+};
+
 //NUM ROWS
 
 db.numRowsMatch = (id_user, cb) => {
@@ -378,6 +399,26 @@ db.getImgsUser = (id_user, cb) => {
 
 };
 
+db.getImgUserById = (id_user_img, cb) => {
+
+    if (conn) {
+        let sql = 'SELECT id_user_img, path, pos FROM user_img ' +
+            'WHERE (id_user_img = :id_user_img)';
+        conn.query(sql, {
+            id_user_img: id_user_img
+        }, (err, rows) => {
+            if (err) {
+                cb(err, null);
+            } else {
+                cb(null, rows);
+            }
+        });
+    } else {
+        cb('Conexion inexistente', null);
+    }
+
+};
+
 db.getDataAfterUpdateSettings = (id_user, cb) => {
 
     if (conn) {
@@ -521,6 +562,29 @@ db.updateEdit = (data, cb) => {
             iam: data.iam,
             enjoy: data.enjoy,
             partner: data.partner
+        }, (err, rows) => {
+            if (err) {
+                cb(err, null);
+            } else {
+                cb(null, rows);
+            }
+        });
+    } else {
+        cb('Conexion inexistente', null);
+    }
+
+};
+
+//DELETE
+
+db.deleteImgUser = (data, cb) => {
+
+    if (conn) {
+        let sql = 'DELETE FROM user_img WHERE ' +
+            'id_user = :id_user AND pos = :pos';
+        conn.query(sql, {
+            id_user: data.id_user,
+            pos: data.pos
         }, (err, rows) => {
             if (err) {
                 cb(err, null);

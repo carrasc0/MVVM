@@ -1,6 +1,19 @@
 const db = require('../models/serverDB');
 const utils = require('../utils/utils');
+const multer = require('multer');
+const fs = require('fs');
 const fc = {};
+const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        cb(null, 'images/users/')
+    },
+    filename: function (req, file, cb) {
+        cb(null, file.originalname)
+    }
+});
+const upload = multer({
+    storage: storage
+}).single('image');
 
 //LOGIN
 
@@ -94,6 +107,46 @@ fc.addRecord = function (req, res, next) {
         }
     });
 
+};
+
+fc.addImgUser = function (req, res, next) {
+    upload(req, res, function (err) {
+        if (err) {
+            next(err);
+        } else {
+            //manage imagen
+            let id_user = req.body.id_user;
+            let pos = req.body.id_user;
+            let new_path = 'user_' + id_user + '_' + pos + '.jpeg';
+            //utils.renameImg(req.file.path, new_path);
+
+            let dataImg = {
+                path: new_path,
+                pos,
+                id_user
+            };
+            db.addImgUser(dataImg, (err, data) => {
+                if (err) {
+                    next(err);
+                } else {
+                    db.getImgUserById(data.insertId, (err, data) => {
+                        if (err) {
+                            next(err);
+                        } else {
+                            res.json({
+                                error: false,
+                                id_user_img: data[0].id_user_img,
+                                path: data[0].path,
+                                pos: data[0].pos
+                            });
+                        }
+
+                    });
+                }
+            });
+        }
+
+    });
 };
 
 //GET
@@ -560,6 +613,50 @@ fc.updateDataEdit = function (req, res, next) {
 
     });
 
+};
+
+fc.updateImgUser = function (req, res, next) {
+    upload(req, res, function (err) {
+        if (err) {
+            next(err);
+        } else {
+            res.json({
+                error: false
+            });
+        }
+
+    });
+};
+
+//DELETE
+
+fc.deleteImgUser = function (req, res, next) {
+
+    let id_user = req.body.id_user;
+    let pos = req.body.id_user;
+
+    let path = 'user_' + id_user + '_' + pos + '.jpeg';
+
+    fs.unlink(path, function (err) {
+        if (err) {
+            next(err);
+        } else {
+            let dataDelete = {
+                id_user,
+                pos
+            };
+
+            db.deleteImgUser(dataDelete, (err, data) => {
+                if (err) {
+                    next(err);
+                } else {
+                    res.json({
+                        error: false
+                    });
+                }
+            });
+        }
+    });
 };
 
 module.exports = fc;

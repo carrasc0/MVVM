@@ -126,6 +126,18 @@ fcChat.removeMsgs = function (data, socket, next) {
     next(returnData);
 };
 
+fcChat.removeConversation = function (data, socket, next) {
+
+    let sender = data.params.sender;
+    let nickname = data.params.nickname;
+    let id_user = data.params.id_user;
+
+       
+
+    
+
+};
+
 fcChat.addNewMsg = function (data, socket, next) {
 
     let params = JSON.stringify(data.params);

@@ -4,6 +4,7 @@ module.exports = function (io) {
     let chat = io.on('connection', function (socket) {
         let address = socket.handshake.address;
         console.log("New connection from " + address);
+        console.log("New connection from " + socket);
 
         socket.on("openTalk", chF.openTalk);
 
@@ -12,6 +13,8 @@ module.exports = function (io) {
         socket.on("removeMsg", chF.removeMsg);
 
         socket.on("removeMsgs", chF.removeMsgs);
+
+        socket.on("removeConversation", chF.removeConversation);
 
         socket.on("addNewMsg", chF.addNewMsg);
 

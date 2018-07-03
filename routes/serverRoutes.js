@@ -17,6 +17,8 @@ module.exports = function (app) {
 
     app.post('/addRecord', fc.addRecord);
 
+    app.post('/addImgUser', fc.addImgUser);
+
     //GET
 
     app.post('/getMatches', fc.getMatches);
@@ -45,9 +47,13 @@ module.exports = function (app) {
 
     app.post('/updateDataEdit', fc.updateDataEdit);
 
+    //DELETE
+
+    app.post('/deleteImgUser', fc.deleteImgUser);
+
     app.use(function (err, req, res, next) {
         console.error(err.stack);
         res.status(500).send('Something broke!');
     });
-    
+
 };

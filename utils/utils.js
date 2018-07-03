@@ -1,4 +1,5 @@
 "use strict";
+const fs = require('fs');
 let Utils = {};
 
 // Converts from degrees to radians.
@@ -56,5 +57,8 @@ Utils.isSender = function (sender, id_user) {
     return parseInt(sender) === parseInt(id_user);
 };
 
+Utils.renameImg = function (old_path, new_path) {
+    fs.renameSync(old_path, 'images/user/' + new_path);
+}
 
 module.exports = Utils;
