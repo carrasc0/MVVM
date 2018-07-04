@@ -2,7 +2,8 @@ const fcChat = {};
 const db = require('../models/serverDB');
 const utils = require('../utils/utils');
 
-/*funciones para el chat
+/*
+funciones para el chat
 open Talk (DONE)
 upScroll chat (DONE)
 remove msgs (DONE)
@@ -10,7 +11,6 @@ remove msg (DONE)
 add msg (DONE)
 get msgs sin leer del usuario (DONE)
 get msgs sin leer entre dos usuarios (DONE)
-
 */
 
 fcChat.openTalk = function (data, socket, next) {
@@ -132,7 +132,7 @@ fcChat.removeConversation = function (data, socket, next) {
     let nickname = data.params.nickname;
     let id_user = data.params.id_user;
 
-       
+    
 
     
 
