@@ -26,4 +26,5 @@ const socketServer = io.listen(8000, () => {
 require('./routes/serverRoutes')(app);
 require('./routes/chatRoutes')(socketServer);
 
-console.log(utils.getBoundaries('4.6665578', '-74.0524521', 2));
+//console.log(utils.getBoundaries('23.04683', '-81.58649', 2));
+//console.log(utils.getDistanciaEntreDosPuntos('23.04683', '-81.58649', '23.064816432118374', '-81.58649'));

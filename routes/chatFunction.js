@@ -132,9 +132,55 @@ fcChat.removeConversation = function (data, socket, next) {
     let nickname = data.params.nickname;
     let id_user = data.params.id_user;
 
-    
+    //primero seleccionar todos los mensajes
+    let dataConv = {
+        sender,
+        nickname
+    };
+    db.getConversationForDelete(dataConv, (err, data) => {
+        if (err) {
+            next(err);
+        } else {
+            if (data.lenght > 0) {
+                //si hay msgs los proceso uno por uno
+                data.forEach(msg => {
 
-    
+                    if (utils.isSender(msg.sender, id_user)) {
+                        //es sender
+                        db.disableAvSender(msg.id_chat, (err, data) => {
+                            if (err) {
+                                next(err);
+                            } else {
+                                console.log('result of disable AV Sender: ' + data);
+                            }
+                        });
+                    } else {
+                        //es nickname
+                        db.disableAvNickname(msg.id_chat, (err, data) => {
+                            if (err) {
+                                next(err);
+                            } else {
+                                console.log('result of disable AV Nickname: ' + data);
+                            }
+                        });
+                    }
+
+                });
+                //termino el foreach
+                let dataReturn = {
+                    error: false
+                };
+                next(dataReturn);
+
+            } else {
+                let dataReturn = {
+                    error: false
+                };
+                next(dataReturn);
+            }
+        }
+
+    });
 
 };
 

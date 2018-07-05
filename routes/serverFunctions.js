@@ -379,7 +379,10 @@ fc.getPeople = function (req, res, next) {
     let min_age = req.body.min_age;
     let max_age = req.body.max_age;
 
-    if (lat) {
+    console.log('body: ' + req.body);
+    console.log('lat: ' + req.body.lat);
+
+    if (lat !== 'null') {
         //trabajar online
 
         let returnData = Array();
@@ -395,25 +398,31 @@ fc.getPeople = function (req, res, next) {
                 max_age,
                 sex,
                 sex_pref,
-                box
+                min_lat: box[1],
+                max_lat: box[0],
+                min_lng: box[3],
+                max_lng: box[2]
             }
 
             db.getPeopleWithCoordinates(dataPeople, (err, data) => {
                 if (err) {
-                    next();
+                    next(err);
                 } else {
+                    console.log('Dist: ' + i + ' cantidad: ' + data.length);
                     returnData.push(data);
                 }
             });
 
             if (returnData > 8) {
-                res.json({
-                    exists: true,
-                    users: returnData
-                });
+                break;
             }
 
         }
+
+        res.json({
+            exists: true,
+            users: returnData
+        });
 
     } else {
         //trabajar offline
@@ -424,14 +433,14 @@ fc.getPeople = function (req, res, next) {
             min_age,
             max_age,
             sex,
-            sex_pref,
-            box
+            sex_pref
         }
         db.getPeople(dataPeople, (err, data) => {
+            console.log('data lenght: ' + data.length);
             if (err) {
-                next();
+                next(err);
             } else {
-                if (data.lenght > 0) {
+                if (data.length > 0) {
                     res.json({
                         exists: true,
                         users: data
@@ -613,6 +622,21 @@ fc.updateDataEdit = function (req, res, next) {
 
     });
 
+};
+
+fc.updateLastLogin = function (req, res, next) {
+
+    let id_user = req.body.id_user;
+
+    db.updateLastLogin(id_user, (err, data) => {
+        if (err) {
+            next(err);
+        } else {
+            res.json({
+                error: false
+            });
+        }
+    });
 };
 
 fc.updateImgUser = function (req, res, next) {

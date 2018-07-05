@@ -47,6 +47,8 @@ module.exports = function (app) {
 
     app.post('/updateDataEdit', fc.updateDataEdit);
 
+    app.post('/updateLastLogin', fc.updateLastLogin);
+
     //DELETE
 
     app.post('/deleteImgUser', fc.deleteImgUser);
