@@ -308,17 +308,17 @@ db.getPeopleWithCoordinates = (data, cb) => {
 
     if (conn) {
 
-        let sql = `SELECT id_user, name, img, TIMESTAMPDIFF(YEAR,date_b,CURDATE()) AS age, prof, ocup ' +
+        let sql = 'SELECT id_user, name, img, TIMESTAMPDIFF(YEAR,date_b,CURDATE()) AS age, prof, ocup, ' +
             '(6371 * ACOS(SIN(RADIANS(ST_X(location))) * SIN(RADIANS(:lat)) + COS(RADIANS(ST_Y(location) - :lng)) ' +
-            '* COS(RADIANS(ST_X(location))) * COS(RADIANS(:lat))))) as distance ' +
+            '* COS(RADIANS(ST_X(location))) * COS(RADIANS(:lat)))) AS distance ' +
             'FROM user WHERE ' +
             '(id_user != :id_user) AND ' +
             '(TIMESTAMPDIFF(YEAR,date_b,CURDATE()) >= :min_age && TIMESTAMPDIFF(YEAR,date_b,CURDATE()) <= :max_age) AND ' +
             '(sex_pref = :sex && sex = :sex_pref) AND ' +
-            'id_user != ALL (SELECT user_to WHERE user_from = :id_user) AND ' +
+            'id_user != ALL (SELECT user_to FROM record WHERE user_from = :id_user) AND ' +
             '(ST_X(location) BETWEEN :min_lat AND :max_lat) AND ' +
-            '(ST_Y(location) BETWEEN :min_lng AND :max_lng) AND ' +
-            'HAVING distance < :distance ORDER BY distance ASC LIMIT 10`;
+            '(ST_Y(location) BETWEEN :min_lng AND :max_lng) ' +
+            'HAVING distance < :dist ORDER BY distance ASC LIMIT 10';
 
         conn.query(sql, {
             lat: data.lat,
@@ -328,10 +328,11 @@ db.getPeopleWithCoordinates = (data, cb) => {
             max_age: data.max_age,
             sex: data.sex,
             sex_pref: data.sex_pref,
-            min_lat: data.box.min_lat,
-            max_lat: data.box.max_lat,
-            min_lng: data.box.min_lng,
-            max_lng: data.box.max_lng
+            min_lat: data.min_lat,
+            max_lat: data.max_lat,
+            min_lng: data.min_lng,
+            max_lng: data.max_lng,
+            dist: data.dist
 
         }, (err, rows) => {
             if (err) {
@@ -356,7 +357,7 @@ db.getPeople = (data, cb) => {
             '(id_user != :id_user) AND ' +
             '(TIMESTAMPDIFF(YEAR,date_b,CURDATE()) >= :min_age && TIMESTAMPDIFF(YEAR,date_b,CURDATE()) <= :max_age) AND ' +
             '(sex_pref = :sex && sex = :sex_pref) AND ' +
-            'id_user != ALL (SELECT user_to WHERE user_from = :id_user) AND ' +
+            'id_user != ALL (SELECT user_to FROM record WHERE user_from = :id_user) ' +
             'ORDER BY created_at ASC LIMIT 10';
 
         conn.query(sql, {

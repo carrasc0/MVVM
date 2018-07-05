@@ -385,9 +385,9 @@ fc.getPeople = function (req, res, next) {
     if (lat !== 'null') {
         //trabajar online
 
-        let returnData = Array();
+        var returnData = new Array();
 
-        for (let i = 100; i < 700; i += 200) {
+        for (let i = 100; i <= 700; i += 200) {
 
             let box = utils.getBoundaries(lat, lng, i);
             let dataPeople = {
@@ -401,7 +401,8 @@ fc.getPeople = function (req, res, next) {
                 min_lat: box[1],
                 max_lat: box[0],
                 min_lng: box[3],
-                max_lng: box[2]
+                max_lng: box[2],
+                dist: i
             }
 
             db.getPeopleWithCoordinates(dataPeople, (err, data) => {
@@ -409,20 +410,37 @@ fc.getPeople = function (req, res, next) {
                     next(err);
                 } else {
                     console.log('Dist: ' + i + ' cantidad: ' + data.length);
-                    returnData.push(data);
+                    data.forEach(msg => {
+                        console.log('element ' + JSON.stringify(msg));
+                        console.log('INCLUDES: ' + returnData.indexOf(msg));
+
+                        if (returnData.length > 0) {
+
+                            returnData.forEach(element => {
+
+                            });
+
+                        } else {
+                            returnData.push(msg);
+                        }
+
+                        console.log('LWNGHT: ' + returnData.length);
+                    });
+
+                    if (i === 700) {
+                        console.log('antes del res ' + returnData.length + ' dist: ' + i);
+                        res.json({
+                            exists: true,
+                            users: returnData
+                        });
+                    }
+
                 }
             });
 
-            if (returnData > 8) {
-                break;
-            }
-
         }
 
-        res.json({
-            exists: true,
-            users: returnData
-        });
+        console.log('fuera del for: ' + returnData.length);
 
     } else {
         //trabajar offline
@@ -436,10 +454,10 @@ fc.getPeople = function (req, res, next) {
             sex_pref
         }
         db.getPeople(dataPeople, (err, data) => {
-            console.log('data lenght: ' + data.length);
             if (err) {
                 next(err);
             } else {
+                console.log('data lenght: ' + data.length);
                 if (data.length > 0) {
                     res.json({
                         exists: true,

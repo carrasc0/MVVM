@@ -83,8 +83,24 @@ Utils.isSender = function (sender, id_user) {
     return parseInt(sender) === parseInt(id_user);
 };
 
-Utils.renameImg = function (old_path, new_path) {
-    fs.renameSync(old_path, 'images/user/' + new_path);
+//Utils.renameImg = function (old_path, new_path) {
+//    fs.renameSync(old_path, 'images/user/' + new_path);
+//}
+
+Utils.existsElementInArray = function (id_user, arreglo) {
+    console.log('element: ' + String.toString(id_user));
+    console.log('array: ' + arreglo.length);
+
+    arreglo.forEach(msg => {
+        console.log('msg: ' + msg.id_user);
+        console.log('element: ' + id_user);
+        console.log('ES IGUAL? ' + id_user == msg.id_user);
+        console.log('ES IGUAL? ' + parseInt(id_user) === parseInt(msg.id_user));
+        if (parseInt(id_user) === parseInt(msg.id_user)) {
+            return true;
+        }
+    });
+    return false;
 }
 
 module.exports = Utils;
