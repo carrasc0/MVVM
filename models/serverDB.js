@@ -2,6 +2,8 @@
 let conn = require('./config');
 let db = {};
 
+//LOGIN
+
 db.loginFacebook = (fb_id, cb) => {
     if (conn) {
         let sql = 'SELECT id_user FROM user WHERE fb_id = :fb_id';
@@ -36,6 +38,141 @@ db.loginGoogle = (g_id, cb) => {
         cb('Conexion inexistente', null);
     }
 
+};
+
+db.getUserAfterLoginFacebook = (fb_id, cb) => {
+    if (conn) {
+        let sql = 'SELECT id_user, name, last_name, img, TIMESTAMPDIFF(YEAR,date_b,CURDATE()) AS age, ' +
+            'min_age, max_age, sex, sex_pref FROM user WHERE fb_id = :fb_id';
+        conn.query(sql, {
+            fb_id: fb_id
+        }, (err, rows) => {
+            if (err) {
+                cb(err, null);
+            } else {
+                cb(null, rows);
+            }
+        });
+    } else {
+        cb('Conexion inexistente', null);
+    }
+
+};
+
+db.getUserAfterLoginGoogle = (g_id, cb) => {
+    if (conn) {
+        let sql = 'SELECT id_user, name, last_name, img, TIMESTAMPDIFF(YEAR,date_b,CURDATE()) AS age, ' +
+            'min_age, max_age, sex, sex_pref FROM user WHERE g_id = :g_id';
+        conn.query(sql, {
+            g_id: g_id
+        }, (err, rows) => {
+            if (err) {
+                cb(err, null);
+            } else {
+                cb(null, rows);
+            }
+        });
+    } else {
+        cb('Conexion inexistente', null);
+    }
+
+};
+
+db.getUserAfterAddNewUser = (id_user, cb) => {
+    if (conn) {
+        let sql = 'SELECT id_user, name, last_name, img, TIMESTAMPDIFF(YEAR, date_b,CURDATE()) AS age, ' +
+            'min_age, max_age, sex, sex_pref FROM user WHERE id_user = :id_user';
+        conn.query(sql, {
+            id_user: id_user
+        }, (err, rows) => {
+            if (err) {
+                cb(err, null);
+            } else {
+                cb(null, rows);
+            }
+        });
+    } else {
+        cb('Conexion inexistente', null);
+    }
+
+};
+
+db.addUserFacebook = (data, cb) => {
+    if (conn) {
+        console.log(data);
+        let sql;
+
+        if (data.email !== 'null') {
+            sql = 'INSERT INTO user (email, img, name, last_name, date_b, prof, ' +
+                'ocup, sex, sex_pref, min_age, max_age, fb_id) ' +
+                'VALUES (:email, :img, :name, :last_name, :date_b, :prof, ' +
+                ':ocup, :sex, :sex_pref, :min_age, :max_age, :fb_id)';
+        } else {
+            sql = 'INSERT INTO user (img, name, last_name, date_b, prof, ' +
+                'ocup, sex, sex_pref, min_age, max_age, fb_id) ' +
+                'VALUES (:img, :name, :last_name, :date_b, :prof, ' +
+                ':ocup, :sex, :sex_pref, :min_age, :max_age, :fb_id)';
+        }
+
+        conn.query(sql, {
+            email: data.email,
+            img: data.img,
+            name: data.name,
+            last_name: data.last_name,
+            date_b: data.date_b,
+            prof: data.prof,
+            ocup: data.ocup,
+            sex: data.sex,
+            sex_pref: data.sex_pref,
+            min_age: data.min_age,
+            max_age: data.max_age,
+            fb_id: data.fb_id
+
+        }, (err, rows) => {
+            if (err) {
+                cb(err, null);
+            } else {
+                cb(null, rows);
+            }
+        });
+    } else {
+        cb('Conexion inexistente', null);
+    }
+};
+
+db.addUserGoogle = (data, cb) => {
+    if (conn) {
+
+        let sql = 'INSERT INTO user (email, img, name, last_name, date_b, prof, ' +
+            'ocup, sex, sex_pref, min_age, max_age, g_id) ' +
+            'VALUES (:email, :img, :name, :last_name, :date_b, :prof, ' +
+            ':ocup, :sex, :sex_pref, :min_age, :max_age, :g_id)';
+
+
+        conn.query(sql, {
+            email: data.email,
+            img: data.img,
+            name: data.name,
+            last_name: data.last_name,
+            date_b: data.date_b,
+            prof: data.prof,
+            ocup: data.ocup,
+            sex: data.sex,
+            sex_pref: data.sex_pref,
+            min_age: data.min_age,
+            max_age: data.max_age,
+            g_id: data.g_id
+
+        }, (err, rows) => {
+            if (err) {
+                cb(err, null);
+            } else {
+                cb(null, rows);
+            }
+        });
+    } else {
+        cb('Conexion inexistente', null);
+    }
 };
 
 //ADD
@@ -178,7 +315,8 @@ db.getSolic = (data, cb) => {
         let sql = 'SELECT r.id_record, r.created_at, r.type, r.user_from, ' +
             'u.name, u.last_name, u.img, TIMESTAMPDIFF(YEAR,u.date_b,CURDATE()) AS age, ' +
             'u.prof, u.ocup FROM record r, user u WHERE ' +
-            '(r.user_to = :id_user) AND (r.user_from = u.id_user) ORDER BY created_at ASC LIMIT :offset, :rows_per_page';
+            '(r.user_to = :id_user) AND (r.user_from = u.id_user) AND (r.used = 0)' +
+            'ORDER BY created_at ASC LIMIT :offset, :rows_per_page';
         conn.query(sql, {
             id_user: data.id_user,
             offset: data.offset,
@@ -460,6 +598,28 @@ db.getDataAfterUpdateEdit = (id_user, cb) => {
 
 };
 
+db.getDataAfterAddMatch = (id_record, cb) => {
+
+    if (conn) {
+        let sql = 'SELECT u.id_user, u.img, ud.name, TIMESTAMPDIFF(YEAR,date_b,CURDATE()) AS age ' +
+            'FROM user u, record r ' +
+            'WHERE (r.id_record = :id_record) AND ' +
+            '(u.id_user = r.user_from) OR (u.id_user = r.user_to)';
+        conn.query(sql, {
+            id_record: id_record
+        }, (err, rows) => {
+            if (err) {
+                cb(err, null);
+            } else {
+                cb(null, rows);
+            }
+        });
+    } else {
+        cb('Conexion inexistente', null);
+    }
+
+};
+
 //UPDATE
 
 db.updateLocation = (data, cb) => {
@@ -574,6 +734,61 @@ db.updateEdit = (data, cb) => {
         cb('Conexion inexistente', null);
     }
 
+};
+
+db.updateDeniedSolic = (id_record, cb) => {
+    if (conn) {
+        let sql = 'UPDATE record SET used = 1 ' +
+            'WHERE id_record = :id_record';
+        conn.query(sql, {
+            id_record: id_record
+        }, (err, rows) => {
+            if (err) {
+                cb(err, null);
+            } else {
+                cb(null, rows);
+            }
+        });
+    } else {
+        cb('Conexion inexistente', null);
+    }
+};
+
+db.updateAcceptedSolic = (id_record, cb) => {
+    if (conn) {
+        let sql = 'UPDATE record SET used = 2 ' +
+            'WHERE id_record = :id_record';
+        conn.query(sql, {
+            id_record: id_record
+        }, (err, rows) => {
+            if (err) {
+                cb(err, null);
+            } else {
+                cb(null, rows);
+            }
+        });
+    } else {
+        cb('Conexion inexistente', null);
+    }
+};
+
+db.updateImgUserAfterAddNewUser = (data, cb) => {
+    if (conn) {
+        let sql = 'UPDATE user SET img = :img ' +
+            'WHERE id_user = :id_user';
+        conn.query(sql, {
+            img: data.img,
+            id_user: data.id_user
+        }, (err, rows) => {
+            if (err) {
+                cb(err, null);
+            } else {
+                cb(null, rows);
+            }
+        });
+    } else {
+        cb('Conexion inexistente', null);
+    }
 };
 
 //DELETE

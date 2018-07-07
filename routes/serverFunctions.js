@@ -5,10 +5,10 @@ const fs = require('fs');
 const fc = {};
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
-        cb(null, 'images/users/')
+        cb(null, 'images/user/');
     },
     filename: function (req, file, cb) {
-        cb(null, file.originalname)
+        cb(null, file.originalname);
     }
 });
 const upload = multer({
@@ -17,67 +17,188 @@ const upload = multer({
 
 //LOGIN
 
+//working
 fc.loginFacebook = function (req, res, next) {
 
     let fb_id = req.body.fb_id;
     db.loginFacebook(fb_id, (err, data) => {
         if (err) {
-            next();
+            next(err);
         } else {
-            res.json({
-                error: false,
-                data: data
-            });
+            console.log(data);
+            console.log(data[0]);
+            if (data[0]) {
+                //exists
+                db.getUserAfterLoginFacebook(fb_id, (err, data) => {
+                    if (err) {
+                        next(err);
+                    } else {
+                        res.json({
+                            isUser: true,
+                            user: data[0]
+                        });
+                    }
+                });
+            } else {
+                res.json({
+                    isUser: false,
+                    user: []
+                });
+            }
         }
 
     });
 };
 
+//working
 fc.loginGoogle = function (req, res, next) {
 
     let g_id = req.body.g_id;
+
     db.loginGoogle(g_id, (err, data) => {
         if (err) {
-            next();
+            next(err);
         } else {
-            res.json({
-                error: false,
-                data: data
-            });
+            if (data[0]) {
+                //exists
+                db.getUserAfterLoginGoogle(g_id, (err, data) => {
+                    if (err) {
+                        next(err);
+                    } else {
+                        res.json({
+                            isUser: true,
+                            user: data[0]
+                        });
+                    }
+                });
+            } else {
+                res.json({
+                    isUser: false,
+                    user: []
+                });
+            }
         }
 
     });
 };
+
 
 fc.addUserFacebook = function (req, res, next) {
-
-    let fb_id = req.body_fb_id;
-    db.loginFacebook(fb_id, (err, data) => {
+    upload(req, res, function (err) {
         if (err) {
-            next();
+            next(err);
         } else {
-            res.json({
-                error: false,
-                data: data
-            });
-        }
+            console.log(req.body);
+            console.log(req.body.user);
+            let user = JSON.parse(req.body.user);
+            console.log('name: ' + user.name);
+            let dataAddUser = {
+                email: user.email,
+                img: 'user_def.jpeg',
+                name: user.name,
+                last_name: user.last_name,
+                date_b: user.date_b,
+                prof: user.prof,
+                ocup: user.ocup,
+                sex: user.sex,
+                sex_pref: user.sex_pref,
+                min_age: user.min_age,
+                max_age: user.max_age,
+                fb_id: user.fb_id
+            };
 
+            db.addUserFacebook(dataAddUser, (err, data) => {
+                if (err) {
+                    next(err);
+                } else {
+                    let newId = data.insertId;
+                    utils.renameImg(req.file.path, 'user_' + newId + '.jpeg');
+
+                    let dataImg = {
+                        img: 'user_' + newId + '.jpeg',
+                        id_user: newId
+                    };
+
+                    db.updateImgUserAfterAddNewUser(dataImg, (err, data) => {
+                        if (err) {
+                            next(err);
+                        } else {
+                            db.getUserAfterAddNewUser(newId, (err, data) => {
+                                if (err) {
+                                    next(err);
+                                } else {
+                                    res.json({
+                                        error: false,
+                                        user: data[0]
+                                    });
+                                    utils.reduceImg('user_' + newId + '.jpeg');
+                                }
+                            });
+                        }
+                    });
+
+                }
+            });
+
+        }
     });
 };
+
 
 fc.addUserGoogle = function (req, res, next) {
 
-    let fb_id = req.body_fb_id;
-    db.loginFacebook(fb_id, (err, data) => {
+    upload(req, res, function (err) {
         if (err) {
-            next();
+            next(err);
         } else {
-            res.json({
-                error: false,
-                data: data
-            });
-        }
+            let email = req.body.email;
+            let img = req.file.filename;
+            let name = req.body.name;
+            let last_name = req.body.last_name;
+            let date_b = req.body.date_b;
+            let prof = req.body.prof;
+            let ocup = req.body.ocup;
+            let sex = req.body.sex;
+            let sex_pref = req.body.sex_pref;
+            let min_age = req.body.min_age;
+            let max_age = req.body.max_age;
+            let g_id = req.body.g_id;
 
+
+            let dataAddUser = {
+                email,
+                img,
+                name,
+                last_name,
+                date_b,
+                prof,
+                ocup,
+                sex,
+                sex_pref,
+                min_age,
+                max_age,
+                g_id
+            };
+
+            db.addUserGoogle(dataAddUser, (err, data) => {
+                if (err) {
+                    next(err);
+                } else {
+                    let newId = data.insertId;
+                    db.getUserAfterAddNewUser(newId, (err, data) => {
+                        if (err) {
+                            next(err);
+                        } else {
+                            res.json({
+                                error: false,
+                                user: data[0]
+                            });
+                        }
+                    });
+                }
+            });
+
+        }
     });
 };
 
@@ -416,9 +537,7 @@ fc.getPeople = function (req, res, next) {
 
                         if (returnData.length > 0) {
 
-                            returnData.forEach(element => {
 
-                            });
 
                         } else {
                             returnData.push(msg);
@@ -669,6 +788,43 @@ fc.updateImgUser = function (req, res, next) {
 
     });
 };
+
+fc.updateDeniedSolic = function (req, res, next) {
+
+    let id_record = req.body.id_record;
+    db.updateDeniedSolic(id_record, (err, data) => {
+        if (err) {
+            next(err);
+        } else {
+            res.json({
+                error: false
+            });
+        }
+    });
+};
+
+fc.updateAcceptedSolic = function (req, res, next) {
+
+    let id_record = req.body.id_record;
+    db.updateAcceptedSolic(id_record, (err, data) => {
+        if (err) {
+            next(err);
+        } else {
+            db.getDataAfterAddMatch(id_record, (err, data) => {
+                if (err) {
+                    next(err);
+                } else {
+                    res.json({
+                        error: false,
+                        user_from: data[0],
+                        user_to: data[1]
+                    });
+                }
+            });
+        }
+    });
+};
+
 
 //DELETE
 

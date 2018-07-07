@@ -1,5 +1,6 @@
 "use strict";
 const fs = require('fs');
+const Jimp = require('jimp');
 let Utils = {};
 
 // Converts from degrees to radians.
@@ -83,9 +84,22 @@ Utils.isSender = function (sender, id_user) {
     return parseInt(sender) === parseInt(id_user);
 };
 
-//Utils.renameImg = function (old_path, new_path) {
-//    fs.renameSync(old_path, 'images/user/' + new_path);
-//}
+Utils.renameImg = function (old_path, new_path) {
+    fs.renameSync(old_path, 'images/user/' + new_path);
+};
+
+Utils.reduceImg = function (path) {
+    Jimp.read('images/user/' + path).then(function (image) {
+        image.resize(Jimp.AUTO, 512);
+        image.quality(80);
+        image.exifRotate();
+        image.normalize();
+        image.write('images/user/' + path);
+    }).catch(function (err) {
+        // handle an exception
+        console.log('JIMP error: ' + err);
+    });
+};
 
 Utils.existsElementInArray = function (id_user, arreglo) {
     console.log('element: ' + String.toString(id_user));

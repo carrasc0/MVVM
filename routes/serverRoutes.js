@@ -49,12 +49,16 @@ module.exports = function (app) {
 
     app.post('/updateLastLogin', fc.updateLastLogin);
 
+    app.post('/updateDeniedSolic', fc.updateDeniedSolic);
+
+    app.post('/updateAcceptedSolic', fc.updateAcceptedSolic);
+
     //DELETE
 
     app.post('/deleteImgUser', fc.deleteImgUser);
 
     app.use(function (err, req, res, next) {
-        console.error(err.stack);
+        console.error('ERROR: ' + err.stack);
         res.status(500).send('Something broke!');
     });
 
