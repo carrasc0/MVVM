@@ -504,7 +504,7 @@ fc.getPeople = function (req, res, next) {
     if (lat !== 'null') {
         //trabajar online
 
-        var returnData = new Array();
+        var returnData = [];
 
         for (let i = 100; i <= 700; i += 200) {
 
@@ -522,7 +522,7 @@ fc.getPeople = function (req, res, next) {
                 min_lng: box[3],
                 max_lng: box[2],
                 dist: i
-            }
+            };
 
             db.getPeopleWithCoordinates(dataPeople, (err, data) => {
                 if (err) {
@@ -569,7 +569,7 @@ fc.getPeople = function (req, res, next) {
             max_age,
             sex,
             sex_pref
-        }
+        };
         db.getPeople(dataPeople, (err, data) => {
             if (err) {
                 next(err);
@@ -583,11 +583,11 @@ fc.getPeople = function (req, res, next) {
                 } else {
                     res.json({
                         exists: false,
-                        users: new Array()
-                    })
+                        users: []
+                    });
                 }
             }
-        })
+        });
     }
 
 };
@@ -759,7 +759,7 @@ fc.updateDataEdit = function (req, res, next) {
                         iam: data[0].iam,
                         enjoy: data[0].enjoy,
                         partner: data[0].partner
-                    })
+                    });
                 }
 
             });
