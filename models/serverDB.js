@@ -219,19 +219,42 @@ db.addImgUser = (data, cb) => {
 
 };
 
-//NUM ROWS
-
-db.numRowsMatch = (id_user, cb) => {
+db.addMatch = (data, cb) => {
     if (conn) {
-        let sql = 'SELECT COUNT(*) as count FROM flech WHERE ' +
-            'user_from = :id_user || user_to = :id_user';
+        let sql = 'INSERT INTO flech (user_from, user_to) ' +
+            'VALUES (:user_from, :user_to)';
         conn.query(sql, {
-            user_from: id_user,
-            user_to: id_user
+            user_from: data.user_from,
+            user_to: data.user_to
         }, (err, rows) => {
             if (err) {
                 cb(err, null);
             } else {
+                cb(null, rows);
+            }
+        });
+    } else {
+        cb('Conexion inexistente', null);
+    }
+
+};
+
+
+
+//NUM ROWS
+
+db.numRowsMatch = (id_user, cb) => {
+    if (conn) {
+        let sql = 'SELECT COUNT(*) AS count FROM flech WHERE ' +
+            'user_from = :id_user OR user_to = :id_user';
+        conn.query(sql, {
+            id_user: id_user
+        }, (err, rows) => {
+            if (err) {
+                cb(err, null);
+            } else {
+                console.log('FLECH COUNT: ' + rows);
+                console.log('FLECH COUNT: ' + rows[0]);
                 cb(null, rows);
             }
         });
@@ -266,8 +289,7 @@ db.numRowsSolic = (id_user, cb) => {
             '(user_to = :id_user) AND ' +
             '(type != 1 && used = 0)';
         conn.query(sql, {
-            user_from: id_user,
-            user_to: id_user
+            id_user: id_user
         }, (err, rows) => {
             if (err) {
                 cb(err, null);
@@ -284,15 +306,30 @@ db.numRowsSolic = (id_user, cb) => {
 //GET
 
 db.getMatches = (data, cb) => {
+    /*
+    id_flech, user_from, user_to (flech) 
+    name, img, age, last_login, status (user) 
+    preview, readed (chat_logs) 
+    */
     if (conn) {
-        let sql = 'SELECT f.id_flech, f.user_from, f.user_to, u.id_user, ' +
-            'u.name, u.img, TIMESTAMPDIFF(YEAR,u.date_b,CURDATE()) AS age, u.last_login, ' +
-            '(SELECT body FROM chat_logs WHERE (sender = :id_user || nickname = :id_user) AS preview ORDER BY created_at DESC LIMIT 1, ' +
-            '(SELECT readed FROM chat_logs WHERE (sender = :id_user || nickname = :id_user) AS readed ORDER BY created_at DESC LIMIT 1, ' +
-            'u.status FROM flech f, user u WHERE ' +
-            '(f.user_from = :id_user || f.user_to = :id_user) && ' +
-            '((f.user_from = u.id_user || f.user_to = u.id_user) && u.id_user != id_user) ' +
+        let sql = 'SELECT f.id_flech, f.user_from, f.user_to, ' +
+            'u.name, u.img, TIMESTAMPDIFF(YEAR,u.date_b,CURDATE()) AS age, u.last_login, u.status, ' +
+
+            '(SELECT body FROM chat_logs WHERE ' +
+            '(sender = :id_user && (nickname = f.user_from || nickname = f.user_to) && av_s = 1) OR ' +
+            '(nickname = :id_user && (sender = f.user_from || sender = f.user_to) && av_n = 1) ' +
+            'ORDER BY chat_logs.created_at DESC LIMIT 1) AS preview,  ' +
+
+            '(SELECT readed FROM chat_logs WHERE ' +
+            '(sender = :id_user && (nickname = f.user_from || nickname = f.user_to) && av_s = 1) OR ' +
+            '(nickname = :id_user && (sender = f.user_from || sender = f.user_to) && av_n = 1) ' +
+            'ORDER BY chat_logs.created_at DESC LIMIT 1) AS readed ' +
+
+            'FROM flech f, user u WHERE ' +
+            '(f.user_from = :id_user || f.user_to = :id_user) AND ' + //flech table
+            '((f.user_from = u.id_user || f.user_to = u.id_user) AND u.id_user != :id_user) ' + //user table
             'LIMIT :offset, :rows_per_page';
+
         conn.query(sql, {
             id_user: data.id_user,
             offset: data.offset,
@@ -312,9 +349,9 @@ db.getMatches = (data, cb) => {
 
 db.getSolic = (data, cb) => {
     if (conn) {
-        let sql = 'SELECT r.id_record, r.created_at, r.type, r.user_from, ' +
+        let sql = 'SELECT r.id_record, r.created_at, r.type, r.user_from as id_user, ' +
             'u.name, u.last_name, u.img, TIMESTAMPDIFF(YEAR,u.date_b,CURDATE()) AS age, ' +
-            'u.prof, u.ocup FROM record r, user u WHERE ' +
+            'u.prof, u.ocup, u.location FROM record r, user u WHERE ' +
             '(r.user_to = :id_user) AND (r.user_from = u.id_user) AND (r.used = 0)' +
             'ORDER BY created_at ASC LIMIT :offset, :rows_per_page';
         conn.query(sql, {
@@ -360,7 +397,7 @@ db.getEvents = (data, cb) => {
 db.getDataEdit = (id_user, cb) => {
     if (conn) {
         let sql = 'SELECT prof, ocup, iam, enjoy, partner ' +
-            'FROM user WHERE id_user = :id_user';
+            'FROM v_user WHERE id_user = :id_user';
         conn.query(sql, {
             id_user: id_user
         }, (err, rows) => {
@@ -419,13 +456,21 @@ db.getImgsEventsByIdEvent = (id_event, cb) => {
 };
 
 db.getUsersForDetailEvent = (data, cb) => {
-
+    console.log(data);
+    /*los matches que les interesa el evento*/
     if (conn) {
-        let sql = 'SELECT u.id_user, u.name, u.img ' +
+        let sql = 'SELECT uei.id_user, u.name, u.img ' +
             'FROM user u, user_event_inter uei, flech f WHERE ' +
+            /*validando que le interese el evento*/
             '(uei.id_event = :id_event) AND ' +
-            '(f.user_from = :id_user && f.user_to = uei.id_user) OR (f.user_from = uei.id_user && f.user_to = :id_user) AND ' +
-            'uei.id_user != id_user';
+            /*validando el id*/
+            '(uei.id_user = u.id_user) AND ' +
+            /*validando que sea un match*/
+            '((f.user_from = :id_user && f.user_to = uei.id_user) OR ' +
+            '(f.user_from = uei.id_user && f.user_to = :id_user)) AND ' +
+            /*validando que no se llame a el mismo*/
+            '(uei.id_user != :id_user)';
+
         conn.query(sql, {
             id_event: data.id_event,
             id_user: data.id_user
@@ -518,11 +563,10 @@ db.getPeople = (data, cb) => {
 
 };
 
-db.getImgsUser = (id_user, cb) => {
-
+db.getUserImgPrincipal = (id_user, cb) => {
     if (conn) {
-        let sql = 'SELECT u.id_user, u.img, ui.id_user_img, ui.path FROM user u, user_img ui ' +
-            'WHERE (ui.id_user = :id_user) AND (u.id_user = :id_user)';
+        let sql = 'SELECT img FROM user u ' +
+            'WHERE id_user = :id_user';
         conn.query(sql, {
             id_user: id_user
         }, (err, rows) => {
@@ -538,13 +582,13 @@ db.getImgsUser = (id_user, cb) => {
 
 };
 
-db.getImgUserById = (id_user_img, cb) => {
+db.getUserImgs = (id_user, cb) => {
 
     if (conn) {
         let sql = 'SELECT id_user_img, path, pos FROM user_img ' +
-            'WHERE (id_user_img = :id_user_img)';
+            'WHERE (id_user = :id_user)';
         conn.query(sql, {
-            id_user_img: id_user_img
+            id_user: id_user
         }, (err, rows) => {
             if (err) {
                 cb(err, null);
@@ -598,15 +642,15 @@ db.getDataAfterUpdateEdit = (id_user, cb) => {
 
 };
 
-db.getDataAfterAddMatch = (id_record, cb) => {
+db.getDataAfterAddMatch = (data, cb) => {
 
     if (conn) {
-        let sql = 'SELECT u.id_user, u.img, ud.name, TIMESTAMPDIFF(YEAR,date_b,CURDATE()) AS age ' +
-            'FROM user u, record r ' +
-            'WHERE (r.id_record = :id_record) AND ' +
-            '(u.id_user = r.user_from) OR (u.id_user = r.user_to)';
+        let sql = 'SELECT u.id_user, u.img, u.name, TIMESTAMPDIFF(YEAR,date_b,CURDATE()) AS age ' +
+            'FROM user u ' + 
+            'WHERE id_user = :user_from OR id_user = :user_to ';
         conn.query(sql, {
-            id_record: id_record
+            user_from: data.user_from,
+            user_to: data.user_to
         }, (err, rows) => {
             if (err) {
                 cb(err, null);
@@ -630,10 +674,10 @@ db.updateLocation = (data, cb) => {
     /*INSERT INTO geom VALUES (ST_GeomFromText('POINT(1 1)'));
     SET @g = 'POINT(1 1)';
     INSERT INTO geom VALUES (ST_GeomFromText(@g));*/
-
+    console.log(data);
     if (conn) {
-        let geo = 'ST_GeomFromText(' + data.lat + ' ' + data.lng + ')';
-        let sql = 'UPDATE user SET location = ' + geo + ' WHERE id_user = :id_user';
+        let geo = '(\'POINT(' + data.lat + ' ' + data.lng + ')\')';
+        let sql = 'UPDATE user SET location = GeomFromText' + geo + ' WHERE id_user = :id_user';
         conn.query(sql, {
             id_user: data.id_user
         }, (err, rows) => {
@@ -650,9 +694,8 @@ db.updateLocation = (data, cb) => {
 };
 
 db.updateUserStatus = (data, cb) => {
-
     if (conn) {
-        let sql = 'UPDATE FROM user SET status = :status WHERE id_user = :id_user';
+        let sql = 'UPDATE user SET status = :status WHERE id_user = :id_user';
         conn.query(sql, {
             status: data.status,
             id_user: data.id_user
@@ -697,6 +740,7 @@ db.updateSettings = (data, cb) => {
         conn.query(sql, {
             min_age: data.min_age,
             max_age: data.max_age,
+            sex_pref: data.sex_pref,
             id_user: data.id_user
         }, (err, rows) => {
             if (err) {
@@ -722,7 +766,8 @@ db.updateEdit = (data, cb) => {
             ocup: data.ocup,
             iam: data.iam,
             enjoy: data.enjoy,
-            partner: data.partner
+            partner: data.partner,
+            id_user: data.id_user
         }, (err, rows) => {
             if (err) {
                 cb(err, null);
@@ -734,6 +779,24 @@ db.updateEdit = (data, cb) => {
         cb('Conexion inexistente', null);
     }
 
+};
+
+db.updateLastLogin = (id_user, cb) => {
+    if (conn) {
+        let sql = 'UPDATE user SET last_login = NOW() ' +
+            'WHERE id_user = :id_user';
+        conn.query(sql, {
+            id_user: id_user
+        }, (err, rows) => {
+            if (err) {
+                cb(err, null);
+            } else {
+                cb(null, rows);
+            }
+        });
+    } else {
+        cb('Conexion inexistente', null);
+    }
 };
 
 db.updateDeniedSolic = (id_record, cb) => {
@@ -764,7 +827,18 @@ db.updateAcceptedSolic = (id_record, cb) => {
             if (err) {
                 cb(err, null);
             } else {
-                cb(null, rows);
+                let sql = 'SELECT user_from, user_to FROM record ' +
+                    'WHERE id_record = :id_record';
+                conn.query(sql, {
+                    id_record: id_record
+                }, (err, rows) => {
+                    if (err) {
+                        cb(err, null);
+                    } else {
+                        cb(null, rows);
+                    }
+                });
+                //cb(null, rows);
             }
         });
     } else {

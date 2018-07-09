@@ -47,6 +47,8 @@ module.exports = function (app) {
 
     app.post('/updateDataEdit', fc.updateDataEdit);
 
+    app.post('/updateImgUser', fc.updateImgUser);
+
     app.post('/updateLastLogin', fc.updateLastLogin);
 
     app.post('/updateDeniedSolic', fc.updateDeniedSolic);

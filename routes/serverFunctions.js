@@ -82,7 +82,7 @@ fc.loginGoogle = function (req, res, next) {
     });
 };
 
-
+//working
 fc.addUserFacebook = function (req, res, next) {
     upload(req, res, function (err) {
         if (err) {
@@ -144,7 +144,7 @@ fc.addUserFacebook = function (req, res, next) {
     });
 };
 
-
+//working
 fc.addUserGoogle = function (req, res, next) {
 
     upload(req, res, function (err) {
@@ -193,6 +193,7 @@ fc.addUserGoogle = function (req, res, next) {
                                 error: false,
                                 user: data[0]
                             });
+                            utils.reduceImg('user_' + newId + '.jpeg');
                         }
                     });
                 }
@@ -204,6 +205,7 @@ fc.addUserGoogle = function (req, res, next) {
 
 //ADD
 
+//working
 fc.addRecord = function (req, res, next) {
 
     let user_from = req.body.user_from;
@@ -218,9 +220,7 @@ fc.addRecord = function (req, res, next) {
 
     db.addRecord(dataRecord, (err, rows) => {
         if (err) {
-            res.json({
-                error: false
-            });
+            next(err);
         } else {
             res.json({
                 error: false
@@ -230,14 +230,16 @@ fc.addRecord = function (req, res, next) {
 
 };
 
+//working
 fc.addImgUser = function (req, res, next) {
     upload(req, res, function (err) {
         if (err) {
             next(err);
         } else {
             //manage imagen
+            console.log(req.body);
             let id_user = req.body.id_user;
-            let pos = req.body.id_user;
+            let pos = req.body.pos;
             let new_path = 'user_' + id_user + '_' + pos + '.jpeg';
             //utils.renameImg(req.file.path, new_path);
 
@@ -260,6 +262,7 @@ fc.addImgUser = function (req, res, next) {
                                 path: data[0].path,
                                 pos: data[0].pos
                             });
+                            utils.reduceImg(data[0].path);
                         }
 
                     });
@@ -272,21 +275,23 @@ fc.addImgUser = function (req, res, next) {
 
 //GET
 
+//working
 fc.getMatches = function (req, res, next) {
 
     let id_user = req.body.id_user;
     let page = req.body.page;
 
-
-
     db.numRowsMatch(id_user, (err, data) => {
         if (err) {
-            next();
+            next(err);
         } else {
-            if (data.count > 0) {
+            console.log('FLECH COUNT fc: ' + data.count);
+            console.log('FLECH COUNT fc: ' + data[0].count);
+            console.log('FLECH COUNT: ' + data[0]);
+            if (data[0].count > 0) {
 
                 let rows_per_page = 10;
-                let num_rows = data.count;
+                let num_rows = data[0].count;
                 let total_pages = Math.ceil(num_rows / rows_per_page);
                 let offset = page * rows_per_page;
 
@@ -298,7 +303,7 @@ fc.getMatches = function (req, res, next) {
 
                 db.getMatches(dataMatch, (err, data) => {
                     if (err) {
-                        next();
+                        next(err);
                     } else {
                         res.json({
                             exists: true,
@@ -318,21 +323,9 @@ fc.getMatches = function (req, res, next) {
         }
 
     });
-
-    db.addRecord(dataRecord, (err, rows) => {
-        if (err) {
-            res.json({
-                error: true
-            });
-        } else {
-            res.json({
-                error: false
-            });
-        }
-    });
-
 };
 
+//working
 fc.getSolic = function (req, res, next) {
 
     let id_user = req.body.id_user;
@@ -342,22 +335,22 @@ fc.getSolic = function (req, res, next) {
 
     db.numRowsSolic(id_user, (err, data) => {
         if (err) {
-            next();
+            next(err);
         } else {
-            if (data.count > 0) {
+            if (data[0].count > 0) {
 
                 let rows_per_page = 10;
-                let num_rows = data.count;
+                let num_rows = data[0].count;
                 let total_pages = Math.ceil(num_rows / rows_per_page);
                 let offset = page * rows_per_page;
 
-                let dataMatch = {
+                let dataSolic = {
                     id_user,
                     offset,
                     rows_per_page
                 };
 
-                db.getSolic(dataMatch, (err, data) => {
+                db.getSolic(dataSolic, (err, data) => {
                     if (err) {
                         next();
                     } else {
@@ -382,6 +375,7 @@ fc.getSolic = function (req, res, next) {
 
 };
 
+//working
 fc.getEvents = function (req, res, next) {
 
     let id_user = req.body.id_user;
@@ -393,10 +387,10 @@ fc.getEvents = function (req, res, next) {
         if (err) {
             next();
         } else {
-            if (data.count > 0) {
+            if (data[0].count > 0) {
 
                 let rows_per_page = 6;
-                let num_rows = data.count;
+                let num_rows = data[0].count;
                 let total_pages = Math.ceil(num_rows / rows_per_page);
                 let offset = page * rows_per_page;
 
@@ -431,13 +425,14 @@ fc.getEvents = function (req, res, next) {
 
 };
 
+//working
 fc.getDataEdit = function (req, res, next) {
 
     let id_user = req.body.id_user;
 
     db.getDataEdit(id_user, (err, data) => {
         if (err) {
-            next();
+            next(err);
         } else {
             res.json({
                 data
@@ -448,6 +443,8 @@ fc.getDataEdit = function (req, res, next) {
 
 };
 
+
+//working
 fc.getEventById = function (req, res, next) {
 
     let id_event = req.body.id_event;
@@ -456,12 +453,12 @@ fc.getEventById = function (req, res, next) {
     //evento
     db.getEventById(id_event, (err, data) => {
         if (err) {
-            next();
+            next(err);
         } else {
             //imagenes del evento
             db.getImgsEventsByIdEvent(id_event, (err, dataImg) => {
                 if (err) {
-                    next();
+                    next(err);
                 } else {
                     //usuarios match que les interese el evento
                     let dataUsers = {
@@ -470,14 +467,14 @@ fc.getEventById = function (req, res, next) {
                     };
                     db.getUsersForDetailEvent(dataUsers, (err, dataUsers) => {
                         if (err) {
-                            next();
+                            next(err);
                         } else {
                             //enviado peticion
                             res.json({
                                 event: data[0],
                                 imgs: dataImg,
                                 users: dataUsers
-                            })
+                            });
                         }
 
                     });
@@ -489,6 +486,7 @@ fc.getEventById = function (req, res, next) {
     });
 
 };
+
 
 fc.getPeople = function (req, res, next) {
 
@@ -594,26 +592,34 @@ fc.getPeople = function (req, res, next) {
 
 };
 
+//working
 fc.getImgsUser = function (req, res, next) {
 
     let id_user = req.body.id_user;
 
-    db.getImgsUser(id_user, (err, data) => {
+    db.getUserImgPrincipal(id_user, (err, data) => {
         if (err) {
-            next();
+            next(err);
         } else {
-            res.json({
-                img: data[0].img,
-                imgs: data
+            db.getUserImgs(id_user, (err, dataImgs) => {
+                if (err) {
+                    next(err);
+                } else {
+                    res.json({
+                        img: data[0].img,
+                        imgs: dataImgs
+                    });
+                }
+
             });
         }
-
     });
 
 };
 
 //UPDATE
 
+//working
 fc.updateLocation = function (req, res, next) {
 
     let id_user = req.body.id_user;
@@ -628,7 +634,7 @@ fc.updateLocation = function (req, res, next) {
 
     db.updateLocation(dataLocation, (err, data) => {
         if (err) {
-            next();
+            next(err);
         } else {
             res.json({
                 error: false
@@ -638,6 +644,7 @@ fc.updateLocation = function (req, res, next) {
 
 };
 
+//working
 fc.updateUserStatus = function (req, res, next) {
 
     let id_user = req.body.id_user;
@@ -650,7 +657,7 @@ fc.updateUserStatus = function (req, res, next) {
 
     db.updateUserStatus(dataStatus, (err, data) => {
         if (err) {
-            next();
+            next(err);
         } else {
             res.json({
                 error: false
@@ -660,6 +667,7 @@ fc.updateUserStatus = function (req, res, next) {
 
 };
 
+//working
 fc.updateRewind = function (req, res, next) {
 
     let user_from = req.body.user_from;
@@ -672,7 +680,7 @@ fc.updateRewind = function (req, res, next) {
 
     db.updateRewind(dataRewind, (err, data) => {
         if (err) {
-            next();
+            next(err);
         } else {
             res.json({
                 error: false
@@ -682,6 +690,7 @@ fc.updateRewind = function (req, res, next) {
 
 };
 
+//working
 fc.updateSettings = function (req, res, next) {
 
     let id_user = req.body.id_user;
@@ -698,27 +707,26 @@ fc.updateSettings = function (req, res, next) {
 
     db.updateSettings(dataSettings, (err, data) => {
         if (err) {
-            next();
+            next(err);
         } else {
             db.getDataAfterUpdateSettings(id_user, (err, data) => {
                 if (err) {
-                    next();
+                    next(err);
                 } else {
                     res.json({
                         error: false,
                         min_age: data[0].min_age,
                         max_age: data[0].max_age,
                         sex_pref: data[0].sex_pref
-                    })
+                    });
                 }
-
             });
         }
-
     });
 
 };
 
+//working
 fc.updateDataEdit = function (req, res, next) {
 
     let id_user = req.body.id_user;
@@ -739,11 +747,11 @@ fc.updateDataEdit = function (req, res, next) {
 
     db.updateEdit(dataEdit, (err, data) => {
         if (err) {
-            next();
+            next(err);
         } else {
             db.getDataAfterUpdateEdit(id_user, (err, data) => {
                 if (err) {
-                    next();
+                    next(err);
                 } else {
                     res.json({
                         prof: data[0].prof,
@@ -761,6 +769,7 @@ fc.updateDataEdit = function (req, res, next) {
 
 };
 
+//working
 fc.updateLastLogin = function (req, res, next) {
 
     let id_user = req.body.id_user;
@@ -776,6 +785,7 @@ fc.updateLastLogin = function (req, res, next) {
     });
 };
 
+//working
 fc.updateImgUser = function (req, res, next) {
     upload(req, res, function (err) {
         if (err) {
@@ -784,14 +794,16 @@ fc.updateImgUser = function (req, res, next) {
             res.json({
                 error: false
             });
+            utils.reduceImg(req.file.originalname);
         }
-
     });
 };
 
+//working
 fc.updateDeniedSolic = function (req, res, next) {
 
     let id_record = req.body.id_record;
+
     db.updateDeniedSolic(id_record, (err, data) => {
         if (err) {
             next(err);
@@ -803,21 +815,34 @@ fc.updateDeniedSolic = function (req, res, next) {
     });
 };
 
+//working
 fc.updateAcceptedSolic = function (req, res, next) {
 
     let id_record = req.body.id_record;
+
     db.updateAcceptedSolic(id_record, (err, data) => {
         if (err) {
             next(err);
         } else {
-            db.getDataAfterAddMatch(id_record, (err, data) => {
+            let dataMatch = {
+                user_from: data[0].user_from,
+                user_to: data[0].user_to
+            };
+            db.addMatch(dataMatch, (err, data) => {
                 if (err) {
                     next(err);
                 } else {
-                    res.json({
-                        error: false,
-                        user_from: data[0],
-                        user_to: data[1]
+                    db.getDataAfterAddMatch(dataMatch, (err, data) => {
+                        if (err) {
+                            next(err);
+                        } else {
+                            console.log(data);
+                            res.json({
+                                error: false,
+                                user_from: data[0],
+                                user_to: data[1]
+                            });
+                        }
                     });
                 }
             });
@@ -825,15 +850,15 @@ fc.updateAcceptedSolic = function (req, res, next) {
     });
 };
 
-
 //DELETE
 
+//working
 fc.deleteImgUser = function (req, res, next) {
 
     let id_user = req.body.id_user;
-    let pos = req.body.id_user;
+    let pos = req.body.pos;
 
-    let path = 'user_' + id_user + '_' + pos + '.jpeg';
+    let path = 'images/user/' + 'user_' + id_user + '_' + pos + '.jpeg';
 
     fs.unlink(path, function (err) {
         if (err) {
