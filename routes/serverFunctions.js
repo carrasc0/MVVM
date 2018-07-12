@@ -385,7 +385,7 @@ fc.getEvents = function (req, res, next) {
 
     db.numRowsEvent(id_user, (err, data) => {
         if (err) {
-            next();
+            next(err);
         } else {
             if (data[0].count > 0) {
 
@@ -402,8 +402,9 @@ fc.getEvents = function (req, res, next) {
 
                 db.getEvents(dataEvent, (err, data) => {
                     if (err) {
-                        next();
+                        next(err);
                     } else {
+                        console.log(data);
                         res.json({
                             exists: true,
                             total_pages: total_pages,
@@ -442,7 +443,6 @@ fc.getDataEdit = function (req, res, next) {
     });
 
 };
-
 
 //working
 fc.getEventById = function (req, res, next) {
@@ -487,7 +487,7 @@ fc.getEventById = function (req, res, next) {
 
 };
 
-
+//working solo sin conexion
 fc.getPeople = function (req, res, next) {
 
     let id_user = req.body.id_user;
@@ -501,65 +501,10 @@ fc.getPeople = function (req, res, next) {
     console.log('body: ' + req.body);
     console.log('lat: ' + req.body.lat);
 
-    if (lat !== 'null') {
-        //trabajar online
+    var returnData = [];
+    let dataPeople;
 
-        var returnData = [];
-
-        for (let i = 100; i <= 700; i += 200) {
-
-            let box = utils.getBoundaries(lat, lng, i);
-            let dataPeople = {
-                lat,
-                lng,
-                id_user,
-                min_age,
-                max_age,
-                sex,
-                sex_pref,
-                min_lat: box[1],
-                max_lat: box[0],
-                min_lng: box[3],
-                max_lng: box[2],
-                dist: i
-            };
-
-            db.getPeopleWithCoordinates(dataPeople, (err, data) => {
-                if (err) {
-                    next(err);
-                } else {
-                    console.log('Dist: ' + i + ' cantidad: ' + data.length);
-                    data.forEach(msg => {
-                        console.log('element ' + JSON.stringify(msg));
-                        console.log('INCLUDES: ' + returnData.indexOf(msg));
-
-                        if (returnData.length > 0) {
-
-
-
-                        } else {
-                            returnData.push(msg);
-                        }
-
-                        console.log('LWNGHT: ' + returnData.length);
-                    });
-
-                    if (i === 700) {
-                        console.log('antes del res ' + returnData.length + ' dist: ' + i);
-                        res.json({
-                            exists: true,
-                            users: returnData
-                        });
-                    }
-
-                }
-            });
-
-        }
-
-        console.log('fuera del for: ' + returnData.length);
-
-    } else {
+    if (Number.isNaN(lat)) {
         //trabajar offline
         let dataPeople = {
             lat,
@@ -588,6 +533,48 @@ fc.getPeople = function (req, res, next) {
                 }
             }
         });
+
+
+    } else {
+
+        var distance = 500;
+        let box = utils.getBoundaries(lat, lng, distance);
+        console.log(box);
+        dataPeople = {
+            lat,
+            lng,
+            id_user,
+            min_age,
+            max_age,
+            sex,
+            sex_pref,
+            min_lat: box[1],
+            max_lat: box[0],
+            min_lng: box[3],
+            max_lng: box[2],
+            dist: distance
+        };
+
+        db.getPeopleWithCoordinates(dataPeople, (err, data) => {
+            if (err) {
+                next(err);
+            } else {
+                if (data.length > 0) {
+                    res.json({
+                        exists: true,
+                        users: data
+                    });
+                } else {
+                    res.json({
+                        exists: false,
+                        users: []
+                    });
+                }
+            }
+        });
+
+        console.log('fuera del for: ' + returnData.length);
+
     }
 
 };
@@ -616,6 +603,29 @@ fc.getImgsUser = function (req, res, next) {
     });
 
 };
+
+
+fc.getUser = function (req, res, next) {
+
+    let id_user = req.body.id_user;
+    db.getUser(id_user, (err, dataUser) => {
+        if (err) {
+            next(err);
+        } else {
+            db.getUserImgs(id_user, (err, dataImgs) => {
+                if (err) {
+                    next(err);
+                } else {
+                    res.json({
+                        user: dataUser,
+                        imgs: dataImgs
+                    });
+                }
+            });
+        }
+    });
+};
+
 
 //UPDATE
 

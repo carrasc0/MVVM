@@ -313,7 +313,7 @@ db.getMatches = (data, cb) => {
     */
     if (conn) {
         let sql = 'SELECT f.id_flech, f.user_from, f.user_to, ' +
-            'u.name, u.img, TIMESTAMPDIFF(YEAR,u.date_b,CURDATE()) AS age, u.last_login, u.status, ' +
+            'u.id_user, u.name, u.img, TIMESTAMPDIFF(YEAR,u.date_b,CURDATE()) AS age, u.last_login, u.status, ' +
 
             '(SELECT body FROM chat_logs WHERE ' +
             '(sender = :id_user && (nickname = f.user_from || nickname = f.user_to) && av_s = 1) OR ' +
@@ -521,6 +521,7 @@ db.getPeopleWithCoordinates = (data, cb) => {
             if (err) {
                 cb(err, null);
             } else {
+                console.log(rows);
                 cb(null, rows);
             }
         });
@@ -646,7 +647,7 @@ db.getDataAfterAddMatch = (data, cb) => {
 
     if (conn) {
         let sql = 'SELECT u.id_user, u.img, u.name, TIMESTAMPDIFF(YEAR,date_b,CURDATE()) AS age ' +
-            'FROM user u ' + 
+            'FROM user u ' +
             'WHERE id_user = :user_from OR id_user = :user_to ';
         conn.query(sql, {
             user_from: data.user_from,
@@ -663,6 +664,30 @@ db.getDataAfterAddMatch = (data, cb) => {
     }
 
 };
+
+db.getUser = (id_user, cb) => {
+
+    if (conn) {
+        let sql = 'SELECT u.id_user, u.img, u.name, u.last_name, TIMESTAMPDIFF(YEAR,u.date_b,CURDATE()) AS age, ' +
+            'u.prof, u.ocup, ud.iam, ud.enjoy, ud.partner FROM user u, user_data ud ' +
+            'WHERE u.id_user = :id_user AND u.id_user = ud.id_user';
+        conn.query(sql, {
+            id_user: id_user
+        }, (err, rows) => {
+            if (err) {
+                cb(err, null);
+            } else {
+                cb(null, rows);
+            }
+        });
+    } else {
+        cb('Conexion inexistente', null);
+    }
+
+};
+
+
+
 
 //UPDATE
 

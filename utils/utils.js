@@ -54,22 +54,22 @@ Utils.getBoundaries = function (lat, lng, distance) {
 
         switch (index) {
             case 0:
-                console.log('En: ' + cardinalCoords[0] + ' lat: ' + returnCoordLat + ' lng: ' + returnCoordLng);
+                console.log('max_lat: ' + 'En: ' + cardinalCoords[0] + ' lat: ' + returnCoordLat + ' lng: ' + returnCoordLng);
                 let max_lat = returnCoordLat;
                 returnData.push(max_lat);
                 break;
             case 1:
-                console.log('En: ' + cardinalCoords[1] + ' lat: ' + returnCoordLat + ' lng: ' + returnCoordLng);
+                console.log('min_lat: ' + 'En: ' + cardinalCoords[1] + ' lat: ' + returnCoordLat + ' lng: ' + returnCoordLng);
                 let min_lat = returnCoordLat;
                 returnData.push(min_lat);
                 break;
             case 2:
-                console.log('En: ' + cardinalCoords[2] + ' lat: ' + returnCoordLat + ' lng: ' + returnCoordLng);
+                console.log('max_lng: ' + 'En: ' + cardinalCoords[2] + ' lat: ' + returnCoordLat + ' lng: ' + returnCoordLng);
                 let max_lng = returnCoordLng;
                 returnData.push(max_lng);
                 break;
             case 3:
-                console.log('En: ' + cardinalCoords[3] + ' lat: ' + returnCoordLat + ' lng: ' + returnCoordLng);
+                console.log('min_lng: ' + 'En: ' + cardinalCoords[3] + ' lat: ' + returnCoordLat + ' lng: ' + returnCoordLng);
                 let min_lng = returnCoordLng;
                 returnData.push(min_lng);
                 break;

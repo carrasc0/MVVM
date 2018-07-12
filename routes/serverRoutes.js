@@ -35,6 +35,8 @@ module.exports = function (app) {
 
     app.post('/getImgsUser', fc.getImgsUser);
 
+    app.post('/getUser', fc.getUser);
+
     //UPDATE
 
     app.post('/updateLocation', fc.updateLocation);
