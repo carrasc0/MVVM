@@ -329,8 +329,8 @@ fc.getMatches = function (req, res, next) {
 fc.getSolic = function (req, res, next) {
 
     let id_user = req.body.id_user;
-    let lat = req.body.lat;
-    let lng = req.body.lng;
+    //let lat = req.body.lat;
+    //let lng = req.body.lng;
     let page = req.body.page;
 
     db.numRowsSolic(id_user, (err, data) => {
@@ -352,10 +352,11 @@ fc.getSolic = function (req, res, next) {
 
                 db.getSolic(dataSolic, (err, data) => {
                     if (err) {
-                        next();
+                        next(err);
                     } else {
+                        console.log(data);
                         res.json({
-                            exists: true,
+                            exist: true,
                             total_pages: total_pages,
                             num_rows: num_rows,
                             solics: data
@@ -617,7 +618,7 @@ fc.getUser = function (req, res, next) {
                     next(err);
                 } else {
                     res.json({
-                        user: dataUser,
+                        user: dataUser[0],
                         imgs: dataImgs
                     });
                 }
