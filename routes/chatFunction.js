@@ -3,14 +3,14 @@ const db = require('../models/serverDB');
 const utils = require('../utils/utils');
 
 /*
-funciones para el chat
-open Talk (DONE)
-upScroll chat (DONE)
-remove msgs (DONE)
-remove msg (DONE)
-add msg (DONE)
-get msgs sin leer del usuario (DONE)
-get msgs sin leer entre dos usuarios (DONE)
+*funciones para el chat
+*open Talk (DONE)
+*upScroll chat (DONE)
+*remove msgs (DONE)
+*remove msg (DONE)
+*add msg (DONE)
+*get msgs sin leer del usuario (DONE)
+*get msgs sin leer entre dos usuarios (DONE)
 */
 
 fcChat.openTalk = function (data, socket, next) {
@@ -19,7 +19,7 @@ fcChat.openTalk = function (data, socket, next) {
     let dataOpen = {
         sender: params.sender,
         nickname: params.nickname
-    }
+    };
     db.openTalk(dataOpen, (err, data) => {
         if (err) {
             next(err);
@@ -41,7 +41,7 @@ fcChat.upScrollChat = function (data, socket, next) {
         sender: params.sender,
         nickname: params.nickname,
         id_chat: params.id_chat
-    }
+    };
 
     db.upChatScroll(dataOpen, (err, data) => {
         if (err) {
@@ -122,7 +122,7 @@ fcChat.removeMsgs = function (data, socket, next) {
     });
     let returnData = {
         error: false
-    }
+    };
     next(returnData);
 };
 
