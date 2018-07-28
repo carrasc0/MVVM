@@ -3,6 +3,8 @@ const fc = require('./serverFunctions');
 
 module.exports = function (app) {
 
+    app.post('/version', fc.version);
+
     //LOGIN
 
     app.post('/loginFacebook', fc.loginFacebook);
@@ -56,6 +58,8 @@ module.exports = function (app) {
     app.post('/updateDeniedSolic', fc.updateDeniedSolic);
 
     app.post('/updateAcceptedSolic', fc.updateAcceptedSolic);
+
+    app.post('/updateInitInfo', fc.updateInitInfo);
 
     //DELETE
 

@@ -15,6 +15,20 @@ const upload = multer({
     storage: storage
 }).single('image');
 
+
+fc.version = function (req, res, next) {
+
+    let version = req.body.version;
+
+    if (version === '1.0') {
+
+    } else {
+
+
+    }
+
+};
+
 //LOGIN
 
 //working
@@ -33,6 +47,7 @@ fc.loginFacebook = function (req, res, next) {
                     if (err) {
                         next(err);
                     } else {
+                        console.log(data[0]);
                         res.json({
                             isUser: true,
                             user: data[0]
@@ -65,6 +80,7 @@ fc.loginGoogle = function (req, res, next) {
                     if (err) {
                         next(err);
                     } else {
+                        console.log(data[0]);
                         res.json({
                             isUser: true,
                             user: data[0]
@@ -491,21 +507,56 @@ fc.getEventById = function (req, res, next) {
 //working solo sin conexion
 fc.getPeople = function (req, res, next) {
 
-    let id_user = req.body.id_user;
+    let id_user = req.body.idUser;
     let lat = req.body.lat;
     let lng = req.body.lng;
     let sex = req.body.sex;
-    let sex_pref = req.body.sex_pref;
-    let min_age = req.body.min_age;
-    let max_age = req.body.max_age;
+    let sex_pref = req.body.sexPref;
+    let min_age = req.body.minAge;
+    let max_age = req.body.maxAge;
 
+    console.log('body: ' + req.body.id_user);
+    console.log('body: ' + req.body.sex);
+    console.log('body: ' + req.body.sex_pref);
+    console.log('body: ' + req.body.min_age);
+    console.log('body: ' + req.body.max_age);
     console.log('body: ' + req.body);
     console.log('lat: ' + req.body.lat);
 
     var returnData = [];
-    let dataPeople;
+    //let dataPeople;
 
-    if (Number.isNaN(lat)) {
+    let dataPeople = {
+        lat,
+        lng,
+        id_user,
+        min_age,
+        max_age,
+        sex,
+        sex_pref
+    };
+    console.log(dataPeople);
+
+    db.getPeople(dataPeople, (err, data) => {
+        if (err) {
+            next(err);
+        } else {
+            console.log('data lenght: ' + data.length);
+            if (data.length > 0) {
+                res.json({
+                    exists: true,
+                    users: data
+                });
+            } else {
+                res.json({
+                    exists: false,
+                    users: []
+                });
+            }
+        }
+    });
+
+    /*if (Number.isNaN(lat)) {
         //trabajar offline
         let dataPeople = {
             lat,
@@ -576,7 +627,7 @@ fc.getPeople = function (req, res, next) {
 
         console.log('fuera del for: ' + returnData.length);
 
-    }
+    }*/
 
 };
 
@@ -617,6 +668,8 @@ fc.getUser = function (req, res, next) {
                 if (err) {
                     next(err);
                 } else {
+                    console.log(dataUser);
+                    console.log(dataImgs);
                     res.json({
                         user: dataUser[0],
                         imgs: dataImgs
@@ -856,6 +909,31 @@ fc.updateAcceptedSolic = function (req, res, next) {
                         }
                     });
                 }
+            });
+        }
+    });
+};
+
+fc.updateInitInfo = function (req, res, next) {
+
+    let sSoy = req.body.soy;
+    let sDisfruto = req.body.disfruto;
+    let sMeGusta = req.body.meGusta;
+    let idUser = req.body.idUser;
+
+    let data = {
+        iam: sSoy,
+        enjoy: sDisfruto,
+        partner: sMeGusta,
+        id_user: idUser
+    };
+
+    db.updateInitInfo(data, (err, data) => {
+        if (err) {
+            next(err);
+        } else {
+            res.json({
+                error: false
             });
         }
     });

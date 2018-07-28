@@ -533,7 +533,7 @@ db.getPeopleWithCoordinates = (data, cb) => {
 };
 
 db.getPeople = (data, cb) => {
-
+    console.log(data);
     if (conn) {
 
         let sql = 'SELECT id_user, name, img, TIMESTAMPDIFF(YEAR,date_b,CURDATE()) AS age, prof, ocup ' +
@@ -806,6 +806,30 @@ db.updateEdit = (data, cb) => {
 
 };
 
+db.updateInitInfo = (data, cb) => {
+
+    if (conn) {
+        let sql = 'UPDATE user_data SET ' +
+            'iam = :iam, enjoy = :enjoy, partner = :partner ' +
+            'WHERE id_user = :id_user';
+        conn.query(sql, {
+            iam: data.iam,
+            enjoy: data.enjoy,
+            partner: data.partner,
+            id_user: data.idUser
+        }, (err, rows) => {
+            if (err) {
+                cb(err, null);
+            } else {
+                cb(null, rows);
+            }
+        });
+    } else {
+        cb('Conexion inexistente', null);
+    }
+
+};
+
 db.updateLastLogin = (id_user, cb) => {
     if (conn) {
         let sql = 'UPDATE user SET last_login = NOW() ' +
@@ -918,9 +942,9 @@ db.deleteImgUser = (data, cb) => {
 db.openTalk = (data, cb) => {
 
     if (conn) {
-        let sql = 'SELECT id_chat, created_at, date, sender, nickname, body, readed FROM chat_logs ' +
+        let sql = 'SELECT id_chat, created_at, sender, nickname, body, readed FROM chat_logs ' +
             /*Si el mensaje lo envia el usuario actual, se verifica la disponibilidad*/
-            'WHERE (sender = :sender && nickname = :nickname && av_s = 1) OR' +
+            'WHERE (sender = :sender && nickname = :nickname && av_s = 1) OR ' +
             /*Si el mensaje ha sido enviado al usuario actual, no se verifica la disponibilidad*/
             '(sender = :nickname && nickname = :sender) LIMIT 40';
         conn.query(sql, {
@@ -1136,6 +1160,27 @@ db.addNewMsg = (data, cb) => {
             sender: data.sender,
             nickname: data.nickname,
             body: data.body
+        }, (err, rows) => {
+            if (err) {
+                cb(err, null);
+            } else {
+                cb(null, rows);
+            }
+        });
+    } else {
+        cb('Conexion inexistente', null);
+    }
+
+};
+
+db.getMsgById = (id_chat, cb) => {
+
+    if (conn) {
+        let sql = 'SELECT id_chat, created_at, sender, nickname, body FROM chat_logs ' +
+            /*Total de mensajes sin leer del usuario para la bottom bar*/
+            'WHERE id_chat = :id_chat';
+        conn.query(sql, {
+            id_chat: id_chat
         }, (err, rows) => {
             if (err) {
                 cb(err, null);

@@ -1,6 +1,7 @@
 "use strict";
 const fs = require('fs');
 const Jimp = require('jimp');
+const moment = require('moment');
 let Utils = {};
 
 // Converts from degrees to radians.
@@ -115,6 +116,11 @@ Utils.existsElementInArray = function (id_user, arreglo) {
         }
     });
     return false;
-}
+};
+
+Utils.formatMsgChat = function (createdAt) {
+    moment.locale('es');
+    return moment(createdAt).format('h:mm a');
+};
 
 module.exports = Utils;

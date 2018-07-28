@@ -3,32 +3,40 @@ const db = require('../models/serverDB');
 const utils = require('../utils/utils');
 
 /*
-*funciones para el chat
-*open Talk (DONE)
-*upScroll chat (DONE)
-*remove msgs (DONE)
-*remove msg (DONE)
-*add msg (DONE)
-*get msgs sin leer del usuario (DONE)
-*get msgs sin leer entre dos usuarios (DONE)
-*/
+ *funciones para el chat
+ *open Talk (DONE)
+ *upScroll chat (DONE)
+ *remove msgs (DONE)
+ *remove msg (DONE)
+ *add msg (DONE)
+ *get msgs sin leer del usuario (DONE)
+ *get msgs sin leer entre dos usuarios (DONE)
+ */
 
 fcChat.openTalk = function (data, socket, next) {
 
-    let params = JSON.stringify(data.params);
+    console.log('open talk:' + data + socket);
+    //let params = JSON.stringify(data.params);
+    //console.log(JSON.stringify(data));
+    //console.log(data.params);
+    //console.log(params);
     let dataOpen = {
-        sender: params.sender,
-        nickname: params.nickname
+        sender: data.sender,
+        nickname: data.nickname
     };
     db.openTalk(dataOpen, (err, data) => {
         if (err) {
             next(err);
         } else {
+            data.forEach(msg => {
+                msg.created_at = utils.formatMsgChat(msg.created_at);
+            });
             let returnData = {
                 exists: true,
                 msgs: data
             };
             //todo implementar moment
+            console.log(returnData);
             next(returnData);
         }
     });
@@ -59,7 +67,9 @@ fcChat.upScrollChat = function (data, socket, next) {
                     if (err) {
                         next(err);
                     } else {
-
+                        data.forEach(msg => {
+                            msg.created_at = utils.formatMsgChat(msg.created_at);
+                        });
                         let returnData = {
                             more: data1.count,
                             exists: true,
@@ -186,10 +196,10 @@ fcChat.removeConversation = function (data, socket, next) {
 
 fcChat.addNewMsg = function (data, socket, next) {
 
-    let params = JSON.stringify(data.params);
-    let sender = params.sender;
-    let nickname = params.nickname;
-    let body = params.body;
+    //let params = JSON.stringify(data.params);
+    let sender = data.sender;
+    let nickname = data.nickname;
+    let body = data.body;
 
     let dataMsg = {
         sender,
@@ -201,14 +211,16 @@ fcChat.addNewMsg = function (data, socket, next) {
         if (err) {
             next(err);
         } else {
-            let dataReturn = {
-                id_chat: data.insertId,
-                body: body
-            };
-            next(dataReturn);
+            db.getMsgById(data.insertId, (err, data) => {
+                if (err) {
+                    next(err);
+                } else {
+                    console.log(data);
+                    next(data);
+                }
+            });
         }
     });
-
 };
 
 fcChat.getMsgsWithoutReadForSender = function (data, socket, next) {

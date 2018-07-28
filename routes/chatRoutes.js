@@ -6,22 +6,10 @@ module.exports = function (io) {
         console.log("New connection from " + address);
         console.log("New connection from " + socket);
 
-        socket.on("openTalk", chF.openTalk);
-
-        socket.on("upScrollChat", chF.upScrollChat);
-
-        socket.on("removeMsg", chF.removeMsg);
-
-        socket.on("removeMsgs", chF.removeMsgs);
-
-        socket.on("removeConversation", chF.removeConversation);
-
-        socket.on("addNewMsg", chF.addNewMsg);
-
-        socket.on("getMsgsWithoutReadForSender", chF.getMsgsWithoutReadForSender);
-
-        socket.on("getMsgsWithoutReadBetweenTwoUsers", chF.getMsgsWithoutReadBetweenTwoUsers);
-
+        socket.on('func', function (data, fn) {
+            chF[data.fn](data.params, socket, fn);
+            console.log('funciones' + data);
+        });
         //socket.on('user', function (data, fn) {
         //    routes.chatFunction[data.func](data.params, chat, socket, fn);
         //    console.log(data);
