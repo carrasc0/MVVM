@@ -42,8 +42,9 @@ db.loginGoogle = (g_id, cb) => {
 
 db.getUserAfterLoginFacebook = (fb_id, cb) => {
     if (conn) {
-        let sql = 'SELECT id_user, name, last_name, img, TIMESTAMPDIFF(YEAR,date_b,CURDATE()) AS age, ' +
-            'min_age, max_age, sex, sex_pref FROM user WHERE fb_id = :fb_id';
+        let sql = 'SELECT u.id_user, u.name, u.last_name, u.img, TIMESTAMPDIFF(YEAR,u.date_b,CURDATE()) AS age, ' +
+            'u.min_age, u.max_age, u.sex, u.sex_pref, u.prof, u.ocup, ud.iam, ud.enjoy, ud.partner ' +
+            'FROM user u, user_data ud WHERE (u.fb_id = :fb_id) AND (u.id_user = ud.id_user)';
         conn.query(sql, {
             fb_id: fb_id
         }, (err, rows) => {
@@ -264,6 +265,27 @@ db.numRowsMatch = (id_user, cb) => {
 
 };
 
+db.numRowsNotif = (id_user, cb) => {
+    if (conn) {
+        let sql = 'SELECT COUNT(*) AS count FROM invite_share WHERE ' +
+            'user_to = :id_user';
+        conn.query(sql, {
+            id_user: id_user
+        }, (err, rows) => {
+            if (err) {
+                cb(err, null);
+            } else {
+                //console.log('FLECH COUNT: ' + rows);
+                //console.log('FLECH COUNT: ' + rows[0]);
+                cb(null, rows);
+            }
+        });
+    } else {
+        cb('Conexion inexistente', null);
+    }
+
+};
+
 db.numRowsEvent = (id_user, cb) => {
     if (conn) {
         let sql = 'SELECT COUNT(*) as count FROM user_event WHERE ' +
@@ -347,6 +369,32 @@ db.getMatches = (data, cb) => {
 
 };
 
+db.getNotif = (data, cb) => {
+    if (conn) {
+        let sql = 'SELECT iss.id_inv_sha, iss.created_at, iss.sended, iss.readed, iss.id_ref, ' +
+            'iss.user_from, iss.user_to, iss.type, u.name AS user_name, u.img, e.name AS ref_name ' +
+            'FROM invite_share iss, user u, event e ' +
+            'WHERE (iss.user_to = :id_user) AND (iss.user_from = u.id_user) AND (iss.id_ref = e.id_event) ' + //flech table
+            //'((f.user_from = u.id_user || f.user_to = u.id_user) AND u.id_user != :id_user) ' + //user table
+            'ORDER BY iss.created_at DESC LIMIT :offset, :rows_per_page';
+
+        conn.query(sql, {
+            id_user: data.id_user,
+            offset: data.offset,
+            rows_per_page: data.rows_per_page
+        }, (err, rows) => {
+            if (err) {
+                cb(err, null);
+            } else {
+                cb(null, rows);
+            }
+        });
+    } else {
+        cb('Conexion inexistente', null);
+    }
+
+};
+
 db.getSolic = (data, cb) => {
     if (conn) {
         let sql = 'SELECT r.id_record, r.created_at, r.type, r.user_from as id_user, ' +
@@ -398,6 +446,25 @@ db.getDataEdit = (id_user, cb) => {
     if (conn) {
         let sql = 'SELECT prof, ocup, iam, enjoy, partner ' +
             'FROM v_user WHERE id_user = :id_user';
+        conn.query(sql, {
+            id_user: id_user
+        }, (err, rows) => {
+            if (err) {
+                cb(err, null);
+            } else {
+                cb(null, rows);
+            }
+        });
+    } else {
+        cb('Conexion inexistente', null);
+    }
+
+};
+
+db.getDataFirstInfo = (id_user, cb) => {
+    if (conn) {
+        let sql = 'SELECT iam, enjoy, partner ' +
+            'FROM user_data WHERE id_user = :id_user';
         conn.query(sql, {
             id_user: id_user
         }, (err, rows) => {
@@ -600,6 +667,26 @@ db.getUserImgs = (id_user, cb) => {
     } else {
         cb('Conexion inexistente', null);
     }
+
+};
+
+db.getImgUserById = (id_user_img, cb) => {
+    if (conn) {
+        let sql = 'SELECT id_user_img, path, pos FROM user_img ' +
+            'WHERE (id_user_img = :id_user_img)';
+        conn.query(sql, {
+            id_user_img: id_user_img
+        }, (err, rows) => {
+            if (err) {
+                cb(err, null);
+            } else {
+                cb(null, rows);
+            }
+        });
+    } else {
+        cb('Conexion inexistente', null);
+    }
+
 
 };
 
@@ -816,7 +903,7 @@ db.updateInitInfo = (data, cb) => {
             iam: data.iam,
             enjoy: data.enjoy,
             partner: data.partner,
-            id_user: data.idUser
+            id_user: data.id_user
         }, (err, rows) => {
             if (err) {
                 cb(err, null);
@@ -884,6 +971,7 @@ db.updateAcceptedSolic = (id_record, cb) => {
                     if (err) {
                         cb(err, null);
                     } else {
+                        console.log('ROWS: ' + rows);
                         cb(null, rows);
                     }
                 });

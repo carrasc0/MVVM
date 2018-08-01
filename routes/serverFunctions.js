@@ -321,11 +321,67 @@ fc.getMatches = function (req, res, next) {
                     if (err) {
                         next(err);
                     } else {
+                        data.forEach(element => {
+                            element.last_login = utils.formatDateMatch(element.last_login);
+                        });
+                        console.log(data);
                         res.json({
                             exists: true,
                             total_pages: total_pages,
                             num_rows: num_rows,
                             matches: data
+                        });
+                    }
+
+                });
+
+            } else {
+                res.json({
+                    exists: false
+                });
+            }
+        }
+
+    });
+};
+
+fc.getNotif = function (req, res, next) {
+
+    let id_user = req.body.id_user;
+    let page = req.body.page;
+
+    db.numRowsNotif(id_user, (err, data) => {
+        if (err) {
+            next(err);
+        } else {
+            console.log('FLECH COUNT fc: ' + data.count);
+            console.log('FLECH COUNT fc: ' + data[0].count);
+            console.log('FLECH COUNT: ' + data[0]);
+            if (data[0].count > 0) {
+
+                let rows_per_page = 10;
+                let num_rows = data[0].count;
+                let total_pages = Math.ceil(num_rows / rows_per_page);
+                let offset = page * rows_per_page;
+
+                let dataNotif = {
+                    id_user,
+                    offset,
+                    rows_per_page
+                };
+
+                db.getNotif(dataNotif, (err, data) => {
+                    if (err) {
+                        next(err);
+                    } else {
+                        data.forEach(element => {
+                            element.created_at = utils.formatDateNotif(element.created_at);
+                        });
+                        res.json({
+                            exists: true,
+                            total_pages: total_pages,
+                            num_rows: num_rows,
+                            notifs: data
                         });
                     }
 
@@ -370,6 +426,9 @@ fc.getSolic = function (req, res, next) {
                     if (err) {
                         next(err);
                     } else {
+                        data.forEach(element => {
+                            element.created_at = utils.formatDateNotif(element.created_at);
+                        });
                         console.log(data);
                         res.json({
                             exist: true,
@@ -507,13 +566,13 @@ fc.getEventById = function (req, res, next) {
 //working solo sin conexion
 fc.getPeople = function (req, res, next) {
 
-    let id_user = req.body.idUser;
+    let id_user = req.body.id_user;
     let lat = req.body.lat;
     let lng = req.body.lng;
     let sex = req.body.sex;
-    let sex_pref = req.body.sexPref;
-    let min_age = req.body.minAge;
-    let max_age = req.body.maxAge;
+    let sex_pref = req.body.sex_pref;
+    let min_age = req.body.min_age;
+    let max_age = req.body.max_age;
 
     console.log('body: ' + req.body.id_user);
     console.log('body: ' + req.body.sex);
@@ -542,6 +601,7 @@ fc.getPeople = function (req, res, next) {
             next(err);
         } else {
             console.log('data lenght: ' + data.length);
+            console.log(data);
             if (data.length > 0) {
                 res.json({
                     exists: true,
@@ -888,6 +948,7 @@ fc.updateAcceptedSolic = function (req, res, next) {
         if (err) {
             next(err);
         } else {
+            console.log(data);
             let dataMatch = {
                 user_from: data[0].user_from,
                 user_to: data[0].user_to
@@ -916,24 +977,35 @@ fc.updateAcceptedSolic = function (req, res, next) {
 
 fc.updateInitInfo = function (req, res, next) {
 
-    let sSoy = req.body.soy;
-    let sDisfruto = req.body.disfruto;
-    let sMeGusta = req.body.meGusta;
-    let idUser = req.body.idUser;
+    let id_user = req.body.id_user;
+    let iam = req.body.iam;
+    let enjoy = req.body.enjoy;
+    let partner = req.body.partner;
+
 
     let data = {
-        iam: sSoy,
-        enjoy: sDisfruto,
-        partner: sMeGusta,
-        id_user: idUser
+        iam,
+        enjoy,
+        partner,
+        id_user
     };
+
+    console.log(data);
 
     db.updateInitInfo(data, (err, data) => {
         if (err) {
             next(err);
         } else {
-            res.json({
-                error: false
+            db.getDataFirstInfo(id_user, (err, data) => {
+                if (err) {
+                    next(err);
+                } else {
+                    console.log(data);
+                    res.json({
+                        error: false,
+                        data: data[0]
+                    });
+                }
             });
         }
     });

@@ -29,7 +29,7 @@ fcChat.openTalk = function (data, socket, next) {
             next(err);
         } else {
             data.forEach(msg => {
-                msg.created_at = utils.formatMsgChat(msg.created_at);
+                msg.created_at = utils.formatDateMsgChat(msg.created_at);
             });
             let returnData = {
                 exists: true,
