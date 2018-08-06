@@ -480,6 +480,9 @@ fc.getEvents = function (req, res, next) {
                     if (err) {
                         next(err);
                     } else {
+                        data.forEach(element => {
+                            element.created_at = utils.formatDateNotif(element.created_at);
+                        });
                         console.log(data);
                         res.json({
                             exists: true,
