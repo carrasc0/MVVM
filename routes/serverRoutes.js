@@ -1,5 +1,6 @@
 const db = require('../models/serverDB');
 const fc = require('./serverFunctions');
+const fcChat = require('./chatFunction');
 
 module.exports = function (app) {
 
@@ -41,6 +42,10 @@ module.exports = function (app) {
 
     app.post('/getUser', fc.getUser);
 
+    app.post('/getMatchesInviteEvent', fc.getMatchesInviteEvent);
+
+    app.post('/inviteUsers', fc.inviteUsers);
+
     //UPDATE
 
     app.post('/updateLocation', fc.updateLocation);
@@ -66,6 +71,14 @@ module.exports = function (app) {
     //DELETE
 
     app.post('/deleteImgUser', fc.deleteImgUser);
+
+    app.post('/deleteProfile', fc.deleteProfile);
+
+    //CHAT
+
+    app.post('/openTalk', fcChat.openTalk);
+
+    app.post('/upScrollChat', fcChat.upScrollChat);
 
     app.use(function (err, req, res, next) {
         console.error('ERROR: ' + err.stack);

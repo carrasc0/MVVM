@@ -118,9 +118,14 @@ Utils.existsElementInArray = function (id_user, arreglo) {
     return false;
 };
 
-Utils.formatDateMsgChat = function (createdAt) {
+Utils.formatTimeMsgChat = function (createdAt) {
     moment.locale('es');
     return moment(createdAt).format('h:mm a');
+};
+
+Utils.formatDateMsgChat = function (createdAt) {
+    moment.locale('es');
+    return moment(createdAt).format('LL');
 };
 
 Utils.formatDateNotif = function (createdAt) {

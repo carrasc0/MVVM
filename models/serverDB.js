@@ -286,10 +286,52 @@ db.numRowsNotif = (id_user, cb) => {
 
 };
 
+db.numRowsNotifShare = (id_user, cb) => {
+    if (conn) {
+        //let sql = 'SELECT COUNT(*) AS count FROM invite_share WHERE ' +
+        //    'user_to = :id_user';
+        let sql = 'SELECT COUNT(*) AS count_invite, (SELECT COUNT(*) FROM share WHERE user_to = :id_user)' +
+            'AS count_share FROM invite WHERE user_to = :id_user';
+        conn.query(sql, {
+            id_user: id_user
+        }, (err, rows) => {
+            if (err) {
+                cb(err, null);
+            } else {
+                //console.log('FLECH COUNT: ' + rows);
+                //console.log('FLECH COUNT: ' + rows[0]);
+                cb(null, rows);
+            }
+        });
+    } else {
+        cb('Conexion inexistente', null);
+    }
+
+};
+
 db.numRowsEvent = (id_user, cb) => {
     if (conn) {
         let sql = 'SELECT COUNT(*) as count FROM user_event WHERE ' +
             'id_user = :id_user';
+        conn.query(sql, {
+            id_user: id_user
+        }, (err, rows) => {
+            if (err) {
+                cb(err, null);
+            } else {
+                cb(null, rows);
+            }
+        });
+    } else {
+        cb('Conexion inexistente', null);
+    }
+
+};
+
+db.numRowsEventPromo = (id_user, cb) => {
+    if (conn) {
+        let sql = 'SELECT COUNT(*) AS count_event, (SELECT COUNT(*) FROM user_promo WHERE id_user = :id_user)' +
+            'AS count_promo FROM user_event WHERE id_user = :id_user';
         conn.query(sql, {
             id_user: id_user
         }, (err, rows) => {
@@ -369,6 +411,7 @@ db.getMatches = (data, cb) => {
 
 };
 
+//quedara sin uso
 db.getNotif = (data, cb) => {
     if (conn) {
         let sql = 'SELECT iss.id_inv_sha, iss.created_at, iss.sended, iss.readed, iss.id_ref, ' +
@@ -377,6 +420,58 @@ db.getNotif = (data, cb) => {
             'WHERE (iss.user_to = :id_user) AND (iss.user_from = u.id_user) AND (iss.id_ref = e.id_event) ' + //flech table
             //'((f.user_from = u.id_user || f.user_to = u.id_user) AND u.id_user != :id_user) ' + //user table
             'ORDER BY iss.created_at DESC LIMIT :offset, :rows_per_page';
+
+        conn.query(sql, {
+            id_user: data.id_user,
+            offset: data.offset,
+            rows_per_page: data.rows_per_page
+        }, (err, rows) => {
+            if (err) {
+                cb(err, null);
+            } else {
+                cb(null, rows);
+            }
+        });
+    } else {
+        cb('Conexion inexistente', null);
+    }
+
+};
+
+db.getInvite = (data, cb) => {
+    if (conn) {
+        let sql = 'SELECT i.id_invite, i.created_at, i.readed, i.id_event, ' +
+            'i.user_from, i.user_to, u.name AS user_name, u.img, e.name AS ref_name ' +
+            'FROM invite i, user u, event e ' +
+            'WHERE (i.user_to = :id_user) AND (i.user_from = u.id_user) AND (i.id_event = e.id_event) ' + //flech table
+            //'((f.user_from = u.id_user || f.user_to = u.id_user) AND u.id_user != :id_user) ' + //user table
+            'ORDER BY i.created_at DESC LIMIT :offset, :rows_per_page';
+
+        conn.query(sql, {
+            id_user: data.id_user,
+            offset: data.offset,
+            rows_per_page: data.rows_per_page
+        }, (err, rows) => {
+            if (err) {
+                cb(err, null);
+            } else {
+                cb(null, rows);
+            }
+        });
+    } else {
+        cb('Conexion inexistente', null);
+    }
+
+};
+
+db.getShare = (data, cb) => {
+    if (conn) {
+        let sql = 'SELECT s.id_share, s.created_at, s.readed, s.id_promo, ' +
+            's.user_from, s.user_to, u.name AS user_name, u.img, p.name AS ref_name ' +
+            'FROM share s, user u, promo p ' +
+            'WHERE (s.user_to = :id_user) AND (s.user_from = u.id_user) AND (s.id_promo = p.id_promo) ' + //flech table
+            //'((f.user_from = u.id_user || f.user_to = u.id_user) AND u.id_user != :id_user) ' + //user table
+            'ORDER BY s.created_at DESC LIMIT :offset, :rows_per_page';
 
         conn.query(sql, {
             id_user: data.id_user,
@@ -422,9 +517,33 @@ db.getSolic = (data, cb) => {
 db.getEvents = (data, cb) => {
     if (conn) {
         let sql = 'SELECT ue.id_event, e.created_at, e.img, e.name, ' +
-            'e.date_b, e.date_e, e.vis, e.inter ' +
+            'e.date_b, e.date_e, e.vis, e.inter, (SELECT id_user FROM user_event_inter WHERE id_user = :id_user ' +
+            'AND id_event = ue.id_event) AS is_inter ' +
             'FROM user_event ue, event e WHERE ' +
             '(ue.id_user = :id_user) AND (ue.id_event = e.id_event) ORDER BY created_at ASC LIMIT :offset, :rows_per_page';
+        conn.query(sql, {
+            id_user: data.id_user,
+            offset: data.offset,
+            rows_per_page: data.rows_per_page
+        }, (err, rows) => {
+            if (err) {
+                cb(err, null);
+            } else {
+                cb(null, rows);
+            }
+        });
+    } else {
+        cb('Conexion inexistente', null);
+    }
+
+};
+
+db.getPromos = (data, cb) => {
+    if (conn) {
+        let sql = 'SELECT up.id_promo, p.created_at, p.img, p.name, p.cat,' +
+            'p.body ' +
+            'FROM user_promo up, promo p WHERE ' +
+            '(up.id_user = :id_user) AND (up.id_promo = p.id_promo) ORDER BY created_at ASC LIMIT :offset, :rows_per_page';
         conn.query(sql, {
             id_user: data.id_user,
             offset: data.offset,
@@ -773,6 +892,29 @@ db.getUser = (id_user, cb) => {
 
 };
 
+db.getMatchesParaInviteEvent = (data, cb) => {
+
+    if (conn) {
+        let sql = 'SELECT DISTINCT u.id_user, u.img, u.name, TIMESTAMPDIFF(YEAR,u.date_b,CURDATE()) AS age ' +
+            'FROM user u, invite i, flech f ' +
+            'WHERE ((f.user_from = 1 && f.user_to = u.id_user) OR (f.user_from = u.id_user && f.user_to = :id_user)) ' +
+            'AND u.id_user != ALL(SELECT user_to FROM invite WHERE user_from = :id_user AND id_event = :id_event)';
+        conn.query(sql, {
+            id_user: data.id_user,
+            id_event: data.id_event
+        }, (err, rows) => {
+            if (err) {
+                cb(err, null);
+            } else {
+                cb(null, rows);
+            }
+        });
+    } else {
+        cb('Conexion inexistente', null);
+    }
+
+};
+
 
 
 
@@ -1023,6 +1165,36 @@ db.deleteImgUser = (data, cb) => {
         cb('Conexion inexistente', null);
     }
 
+};
+
+db.inviteUsers = (data, cb) => {
+
+    let users = data.users;
+    let aux = users.split(',');
+
+    console.log(users);
+    console.log(aux);
+
+    aux.forEach(id_user => {
+
+        if (conn) {
+            let sql = 'INSERT INTO invite (id_event, user_from, user_to) ' +
+                'VALUES (:id_event, :user_from, :user_to)';
+            conn.query(sql, {
+                id_event: data.id_event,
+                user_from: data.id_user,
+                user_to: id_user
+            }, (err, rows) => {
+                if (err) {
+                    cb(err, null);
+                }
+            });
+        } else {
+            cb('Conexion inexistente', null);
+        }
+
+    });
+    cb(null, false);
 };
 
 //CHAT

@@ -20,13 +20,25 @@ fc.version = function (req, res, next) {
 
     let version = req.body.version;
 
-    if (version === '1.0') {
-
+    //si es diferente a la ultima version, que actualice
+    if (version !== '1.0') {
+        res.json({
+            update: true,
+            features: ['Nuevas funcionalidades agregadas',
+                'Agregados nuevos datos en tu perfil',
+                'Corregidos algunos errores',
+                'Adaptaciones de ciertas funcionalidades a ciertos dispositivos',
+                'Ligeros cambios en algunas interfaces',
+                'Ahora puedes ingresar mas datos como estatura, preferencia religiosa, etc',
+                'Agregado integracion con el horoscopo'
+            ]
+        });
     } else {
-
-
+        res.json({
+            update: false,
+            features: []
+        });
     }
-
 };
 
 //LOGIN
@@ -350,7 +362,91 @@ fc.getNotif = function (req, res, next) {
     let id_user = req.body.id_user;
     let page = req.body.page;
 
-    db.numRowsNotif(id_user, (err, data) => {
+    let rows_per_page = 5;
+    let num_rows_invite;
+    let num_rows_share;
+    let num_rows_total;
+    let total_pages;
+
+    db.numRowsNotifShare(id_user, (err, data) => {
+        if (err) {
+            next(err);
+        } else {
+
+            console.log(data);
+
+            num_rows_invite = data[0].count_invite;
+            num_rows_share = data[0].count_share;
+
+            num_rows_total = num_rows_invite + num_rows_share;
+            total_pages = Math.ceil(num_rows_total / rows_per_page);
+
+            //console.log((parseInt(num_rows_event) + parseInt(num_rows_promo)));
+            console.log(' ' + num_rows_invite + ' ' + num_rows_share);
+
+            if ((num_rows_total) > 0) {
+
+                let offset = page * rows_per_page;
+
+                let dataInvite = {
+                    id_user,
+                    offset,
+                    rows_per_page
+                };
+
+                db.getInvite(dataInvite, (err, data) => {
+                    if (err) {
+                        next(err);
+                    } else {
+                        data.forEach(element => {
+                            element.created_at = utils.formatDateNotif(element.created_at);
+                            //element.date_b = utils.formatDateNotif(element.date_b);
+                            //element.date_e = utils.formatDateNotif(element.date_e);
+                        });
+                        console.log('invite: ' + data);
+
+                        //let total_pages = Math.ceil(num_rows_event / rows_per_page);
+                        let offset = page * rows_per_page;
+
+                        let dataShare = {
+                            id_user,
+                            offset,
+                            rows_per_page
+                        };
+                        db.getShare(dataShare, (err, dataFinal) => {
+                            if (err) {
+                                next(err);
+                            } else {
+                                dataFinal.forEach(element => {
+                                    element.created_at = utils.formatDateNotif(element.created_at);
+                                });
+                                res.json({
+                                    exists: true,
+                                    total_pages: total_pages,
+                                    num_rows: num_rows_total,
+                                    invites: data,
+                                    shares: dataFinal
+                                });
+                            }
+
+                        });
+
+                    }
+
+                });
+
+            } else {
+                res.json({
+                    exists: false
+                });
+            }
+        }
+
+    });
+
+
+
+    /*db.numRowsNotif(id_user, (err, data) => {
         if (err) {
             next(err);
         } else {
@@ -394,7 +490,7 @@ fc.getNotif = function (req, res, next) {
             }
         }
 
-    });
+    });*/
 };
 
 //working
@@ -455,11 +551,91 @@ fc.getSolic = function (req, res, next) {
 fc.getEvents = function (req, res, next) {
 
     let id_user = req.body.id_user;
-    let lat = req.body.lat;
-    let lng = req.body.lng;
+    //let lat = req.body.lat;
+    //let lng = req.body.lng;
     let page = req.body.page;
 
-    db.numRowsEvent(id_user, (err, data) => {
+    let rows_per_page = 6;
+    let num_rows_event;
+    let num_rows_promo;
+
+    db.numRowsEventPromo(id_user, (err, data) => {
+        if (err) {
+            next(err);
+        } else {
+
+            console.log(data);
+
+            num_rows_event = data[0].count_event;
+            num_rows_promo = data[0].count_promo;
+
+            console.log((parseInt(num_rows_event) + parseInt(num_rows_promo)));
+            console.log(' ' + num_rows_event + ' ' + num_rows_promo);
+
+            if ((num_rows_event + num_rows_promo) > 0) {
+
+                let total_pages = Math.ceil(num_rows_event / rows_per_page);
+                let offset = page * rows_per_page;
+
+                let dataEvent = {
+                    id_user,
+                    offset,
+                    rows_per_page
+                };
+
+                db.getEvents(dataEvent, (err, data) => {
+                    if (err) {
+                        next(err);
+                    } else {
+                        data.forEach(element => {
+                            element.created_at = utils.formatDateNotif(element.created_at);
+                            element.date_b = utils.formatDateNotif(element.date_b);
+                            element.date_e = utils.formatDateNotif(element.date_e);
+                        });
+                        console.log('event: ' + data);
+
+                        let total_pages = Math.ceil(num_rows_event / rows_per_page);
+                        let offset = page * rows_per_page;
+
+                        let dataPromo = {
+                            id_user,
+                            offset,
+                            rows_per_page
+                        };
+                        db.getPromos(dataPromo, (err, dataFinal) => {
+                            if (err) {
+                                next(err);
+                            } else {
+                                dataFinal.forEach(element => {
+                                    element.created_at = utils.formatDateNotif(element.created_at);
+                                });
+                                res.json({
+                                    exists: true,
+                                    total_pages: total_pages,
+                                    num_rows: (num_rows_event + num_rows_promo),
+                                    events: data,
+                                    promos: dataFinal
+                                });
+                            }
+
+                        });
+
+                    }
+
+                });
+
+            } else {
+                res.json({
+                    exists: false
+                });
+            }
+        }
+
+    });
+
+
+
+    /*db.numRowsEvent(id_user, (err, data) => {
         if (err) {
             next(err);
         } else {
@@ -501,7 +677,7 @@ fc.getEvents = function (req, res, next) {
             }
         }
 
-    });
+    });*/
 
 };
 
@@ -741,6 +917,57 @@ fc.getUser = function (req, res, next) {
             });
         }
     });
+};
+
+//working
+fc.getMatchesInviteEvent = function (req, res, next) {
+
+    let id_user = req.body.id_user;
+    let id_event = req.body.id_event;
+
+    let dataGetMatches = {
+        id_user,
+        id_event
+    };
+
+    db.getMatchesParaInviteEvent(dataGetMatches, (err, data) => {
+        if (err) {
+            next(err);
+        } else {
+            res.json({
+                exists: true,
+                users: data
+            });
+        }
+
+    });
+
+};
+
+//working
+fc.inviteUsers = function (req, res, next) {
+
+    let id_user = req.body.id_user;
+    let id_event = req.body.id_event;
+    let users = req.body.users;
+
+    let dataInvite = {
+        id_user,
+        id_event,
+        users
+    };
+
+    db.inviteUsers(dataInvite, (err, data) => {
+        if (err) {
+            next(err);
+        } else {
+            res.json({
+                error: false
+            });
+        }
+
+    });
+
 };
 
 
@@ -1021,6 +1248,35 @@ fc.deleteImgUser = function (req, res, next) {
 
     let id_user = req.body.id_user;
     let pos = req.body.pos;
+
+    let path = 'images/user/' + 'user_' + id_user + '_' + pos + '.jpeg';
+
+    fs.unlink(path, function (err) {
+        if (err) {
+            next(err);
+        } else {
+            let dataDelete = {
+                id_user,
+                pos
+            };
+
+            db.deleteImgUser(dataDelete, (err, data) => {
+                if (err) {
+                    next(err);
+                } else {
+                    res.json({
+                        error: false
+                    });
+                }
+            });
+        }
+    });
+};
+
+//todo ver como hacer delete profile de una manera segura.
+fc.deleteProfile = function (req, res, next) {
+
+    let id_user = req.body.id_user;
 
     let path = 'images/user/' + 'user_' + id_user + '_' + pos + '.jpeg';
 
