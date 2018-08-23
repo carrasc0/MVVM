@@ -895,7 +895,7 @@ fc.getImgsUser = function (req, res, next) {
 
 };
 
-
+//working
 fc.getUser = function (req, res, next) {
 
     let id_user = req.body.id_user;
