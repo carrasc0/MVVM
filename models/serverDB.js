@@ -199,6 +199,26 @@ db.addRecord = (data, cb) => {
 
 };
 
+db.addInterestedEvent = (data, cb) => {
+    if (conn) {
+        let sql = 'INSERT INTO user_event_inter (id_user, id_event) ' +
+            'VALUES (:id_user, :id_event)';
+        conn.query(sql, {
+            id_user: data.id_user,
+            id_event: data.id_event
+        }, (err, rows) => {
+            if (err) {
+                cb(err, null);
+            } else {
+                cb(null, rows);
+            }
+        });
+    } else {
+        cb('Conexion inexistente', null);
+    }
+
+};
+
 db.addImgUser = (data, cb) => {
     if (conn) {
         let sql = 'INSERT INTO user_img (path, pos, id_user) ' +
@@ -602,8 +622,8 @@ db.getDataFirstInfo = (id_user, cb) => {
 db.getEventById = (id_event, cb) => {
 
     if (conn) {
-        let sql = 'SELECT id_event, created_at, img, name, place, date_b, date_e, body, ' +
-            'type, vis, inter ' +
+        let sql = 'SELECT id_event, created_at, date_b, date_e, img, name, place, body, ' +
+            'location, vis, inter ' +
             'FROM event WHERE id_event = :id_event';
         conn.query(sql, {
             id_event: id_event
@@ -896,8 +916,8 @@ db.getMatchesParaInviteEvent = (data, cb) => {
 
     if (conn) {
         let sql = 'SELECT DISTINCT u.id_user, u.img, u.name, TIMESTAMPDIFF(YEAR,u.date_b,CURDATE()) AS age ' +
-            'FROM user u, invite i, flech f ' +
-            'WHERE ((f.user_from = 1 && f.user_to = u.id_user) OR (f.user_from = u.id_user && f.user_to = :id_user)) ' +
+            'FROM user u, flech f ' +
+            'WHERE ((f.user_from = :id_user && f.user_to = u.id_user) OR (f.user_from = u.id_user && f.user_to = :id_user)) ' +
             'AND u.id_user != ALL(SELECT user_to FROM invite WHERE user_from = :id_user AND id_event = :id_event)';
         conn.query(sql, {
             id_user: data.id_user,

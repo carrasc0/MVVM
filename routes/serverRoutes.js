@@ -22,6 +22,8 @@ module.exports = function (app) {
 
     app.post('/addImgUser', fc.addImgUser);
 
+    app.post('/addInterestedEvent', fc.addInterestedEvent);
+
     //GET
 
     app.post('/getMatches', fc.getMatches);

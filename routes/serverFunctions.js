@@ -258,6 +258,28 @@ fc.addRecord = function (req, res, next) {
 
 };
 
+fc.addInterestedEvent = function (req, res, next) {
+
+    let id_user = req.body.id_user;
+    let id_event = req.body.id_event;
+
+    let dataAdd = {
+        id_user,
+        id_event
+    };
+
+    db.addInterestedEvent(dataAdd, (err, rows) => {
+        if (err) {
+            next(err);
+        } else {
+            res.json({
+                error: false
+            });
+        }
+    });
+
+};
+
 //working
 fc.addImgUser = function (req, res, next) {
     upload(req, res, function (err) {
@@ -725,6 +747,7 @@ fc.getEventById = function (req, res, next) {
                             next(err);
                         } else {
                             //enviado peticion
+                            data[0].created_at = utils.formatDateNotif(data[0].created_at);
                             res.json({
                                 event: data[0],
                                 imgs: dataImg,
@@ -921,6 +944,8 @@ fc.getUser = function (req, res, next) {
 
 //working
 fc.getMatchesInviteEvent = function (req, res, next) {
+
+    console.log(req.body);
 
     let id_user = req.body.id_user;
     let id_event = req.body.id_event;
