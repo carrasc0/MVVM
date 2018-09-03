@@ -722,13 +722,19 @@ fc.getDataEdit = function (req, res, next) {
 };
 
 //working
+//todo poner por fin la distancia del usuario??
 fc.getEventById = function (req, res, next) {
 
     let id_event = req.body.id_event;
     let id_user = req.body.id_user;
 
+    let dataEvent = {
+        id_user,
+        id_event
+    };
+
     //evento
-    db.getEventById(id_event, (err, data) => {
+    db.getEventById(dataEvent, (err, data) => {
         if (err) {
             next(err);
         } else {
@@ -959,6 +965,7 @@ fc.getMatchesInviteEvent = function (req, res, next) {
         if (err) {
             next(err);
         } else {
+            console.log(data);
             res.json({
                 exists: true,
                 users: data

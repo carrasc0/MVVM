@@ -409,10 +409,10 @@ db.getMatches = (data, cb) => {
             '(nickname = :id_user && (sender = f.user_from || sender = f.user_to) && av_n = 1) ' +
             'ORDER BY chat_logs.created_at DESC LIMIT 1) AS readed ' +
 
-            'FROM flech f, user u WHERE ' +
+            'FROM flech f, user u WHERE '+ 
             '(f.user_from = :id_user || f.user_to = :id_user) AND ' + //flech table
             '((f.user_from = u.id_user || f.user_to = u.id_user) AND u.id_user != :id_user) ' + //user table
-            'LIMIT :offset, :rows_per_page';
+            'ORDER BY readed DESC, u.status DESC, u.last_login DESC LIMIT :offset, :rows_per_page';
 
         conn.query(sql, {
             id_user: data.id_user,
@@ -537,7 +537,7 @@ db.getSolic = (data, cb) => {
 db.getEvents = (data, cb) => {
     if (conn) {
         let sql = 'SELECT ue.id_event, e.created_at, e.img, e.name, ' +
-            'e.date_b, e.date_e, e.vis, e.inter, (SELECT id_user FROM user_event_inter WHERE id_user = :id_user ' +
+            'e.date_b, e.date_e, e.vis, e.inter, (SELECT DISTINCT id_user FROM user_event_inter WHERE id_user = :id_user ' +
             'AND id_event = ue.id_event) AS is_inter ' +
             'FROM user_event ue, event e WHERE ' +
             '(ue.id_user = :id_user) AND (ue.id_event = e.id_event) ORDER BY created_at ASC LIMIT :offset, :rows_per_page';
@@ -619,14 +619,16 @@ db.getDataFirstInfo = (id_user, cb) => {
 
 };
 
-db.getEventById = (id_event, cb) => {
+db.getEventById = (data, cb) => {
 
     if (conn) {
         let sql = 'SELECT id_event, created_at, date_b, date_e, img, name, place, body, ' +
-            'location, vis, inter ' +
+            'location, vis, inter, (SELECT DISTINCT id_user FROM user_event_inter WHERE id_user = :id_user ' +
+            'AND id_event = :id_event) AS is_inter ' +
             'FROM event WHERE id_event = :id_event';
         conn.query(sql, {
-            id_event: id_event
+            id_user: data.id_user,
+            id_event: data.id_event
         }, (err, rows) => {
             if (err) {
                 cb(err, null);
