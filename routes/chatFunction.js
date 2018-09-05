@@ -306,7 +306,9 @@ fcChat.addNewMsg = function (data, socket, next) {
                     next(err);
                 } else {
                     console.log(data);
-                    next(data);
+                    //next(data);
+                    socket.to(nickname).emit("recNewMsg", data);
+                    socket.to(sender).emit("addNewMsg", data);
                 }
             });
         }

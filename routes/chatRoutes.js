@@ -1,5 +1,4 @@
 const chF = require('./chatFunction');
-
 module.exports = function (io) {
     // Initialize a new socket.io application, named 'chat'
     //let chat =
@@ -37,6 +36,9 @@ module.exports = function (io) {
         socket.on('func', function (data, fn) {
             chF[data.fn](data.params, socket, fn);
             console.log('funciones' + data);
+        });
+        socket.on('/newMsg', function (data, fn) {
+            chF.addNewMsg(data.params, socket, fn);
         });
         //socket.on('user', function (data, fn) {
         //    routes.chatFunction[data.func](data.params, chat, socket, fn);
