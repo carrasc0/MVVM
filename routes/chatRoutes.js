@@ -23,7 +23,7 @@ module.exports = function (io) {
 
     });
 
-    let chatSocket = io.of('/chat').io.on('connection', function (socket) {
+    let chatSocket = io.of('/chat').on('connection', function (socket) {
         //let address = socket.handshake.address;
         //console.log(socket);
         var handshakeData = socket.request;
