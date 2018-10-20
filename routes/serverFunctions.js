@@ -47,6 +47,8 @@ fc.version = function (req, res, next) {
 fc.loginFacebook = function (req, res, next) {
 
     let fb_id = req.body.fb_id;
+    let email = req.body.email;
+
     db.loginFacebook(fb_id, (err, data) => {
         if (err) {
             next(err);
@@ -55,22 +57,70 @@ fc.loginFacebook = function (req, res, next) {
             console.log(data[0]);
             if (data[0]) {
                 //exists
-                db.getUserAfterLoginFacebook(fb_id, (err, data) => {
+                db.getUserAfterLoginFacebook(fb_id, (err, data1) => {
                     if (err) {
                         next(err);
                     } else {
-                        console.log(data[0]);
+                        console.log(data1[0]);
                         res.json({
                             isUser: true,
-                            user: data[0]
+                            user: data1[0],
+                            msg: ''
                         });
                     }
                 });
             } else {
-                res.json({
-                    isUser: false,
-                    user: []
-                });
+                //no existe, hacemos el procedimiento del email
+                // si el email existe
+                if (email !== 'none') {
+                    db.loginExistsEmail(email, (err, data2) => {
+                        if (err) {
+                            next(err);
+                        } else {
+                            if (data2[0]) {
+                                //existe el email anclado a una cuenta
+                                //agrego el fb_id a la cuenta
+                                let dataUpdate = {
+                                    fb_id,
+                                    email
+                                };
+                                db.updateAddFbId(dataUpdate, (err, data3) => {
+                                    if (err) {
+                                        next(err);
+                                    } else {
+                                        //se actualizo el fb_id, devuelvo los datos
+                                        db.getUserAfterLoginFacebook(fb_id, (err, data4) => {
+                                            if (err) {
+                                                next(err);
+                                            } else {
+                                                console.log(data4[0]);
+                                                res.json({
+                                                    isUser: true,
+                                                    user: data4[0],
+                                                    msg: 'Parece que anteriormente habías iniciado sesión con Google, ya existía una cuenta relacionada con este email, ' +
+                                                        'la hemos integrado.'
+                                                });
+                                            }
+                                        });
+                                    }
+                                });
+                            } else {
+                                //no existe ni email ni fb_id
+                                res.json({
+                                    isUser: false,
+                                    user: [],
+                                    msg: ''
+                                });
+                            }
+                        }
+                    });
+                } else {
+                    res.json({
+                        isUser: false,
+                        user: [],
+                        msg: ''
+                    });
+                }
             }
         }
 
@@ -81,6 +131,7 @@ fc.loginFacebook = function (req, res, next) {
 fc.loginGoogle = function (req, res, next) {
 
     let g_id = req.body.g_id;
+    let email = req.body.email;
 
     db.loginGoogle(g_id, (err, data) => {
         if (err) {
@@ -88,22 +139,70 @@ fc.loginGoogle = function (req, res, next) {
         } else {
             if (data[0]) {
                 //exists
-                db.getUserAfterLoginGoogle(g_id, (err, data) => {
+                db.getUserAfterLoginGoogle(g_id, (err, data1) => {
                     if (err) {
                         next(err);
                     } else {
-                        console.log(data[0]);
+                        console.log(data1[0]);
                         res.json({
                             isUser: true,
-                            user: data[0]
+                            user: data1[0],
+                            msg: ''
                         });
                     }
                 });
             } else {
-                res.json({
-                    isUser: false,
-                    user: []
-                });
+                //no existe, hacemos el procedimiento del email
+                // si el email existe
+                if (email !== 'none') {
+                    db.loginExistsEmail(email, (err, data2) => {
+                        if (err) {
+                            next(err);
+                        } else {
+                            if (data2[0]) {
+                                //existe el email anclado a una cuenta
+                                //agrego el fb_id a la cuenta
+                                let dataUpdate = {
+                                    g_id,
+                                    email
+                                };
+                                db.updateAddGId(dataUpdate, (err, data3) => {
+                                    if (err) {
+                                        next(err);
+                                    } else {
+                                        //se actualizo el fb_id, devuelvo los datos
+                                        db.getUserAfterLoginGoogle(g_id, (err, data4) => {
+                                            if (err) {
+                                                next(err);
+                                            } else {
+                                                console.log(data4[0]);
+                                                res.json({
+                                                    isUser: true,
+                                                    user: data4[0],
+                                                    msg: 'Parece que anteriormente habías iniciado sesión con Facebook, ya existía una cuenta relacionada con este email, ' +
+                                                        'la hemos integrado.'
+                                                });
+                                            }
+                                        });
+                                    }
+                                });
+                            } else {
+                                //no existe ni email ni fb_id
+                                res.json({
+                                    isUser: false,
+                                    user: [],
+                                    msg: ''
+                                });
+                            }
+                        }
+                    });
+                } else {
+                    res.json({
+                        isUser: false,
+                        user: [],
+                        msg: ''
+                    });
+                }
             }
         }
 
@@ -247,6 +346,22 @@ fc.addRecord = function (req, res, next) {
     };
 
     db.addRecord(dataRecord, (err, rows) => {
+        if (err) {
+            next(err);
+        } else {
+            res.json({
+                error: false
+            });
+        }
+    });
+
+};
+
+fc.addViewEvent = function (req, res, next) {
+
+    let id_event = req.body.id_event;
+
+    db.addViewEvent(id_event, (err, rows) => {
         if (err) {
             next(err);
         } else {
@@ -754,6 +869,7 @@ fc.getEventById = function (req, res, next) {
                         } else {
                             //enviado peticion
                             data[0].created_at = utils.formatDateNotif(data[0].created_at);
+                            console.log(data);
                             res.json({
                                 event: data[0],
                                 imgs: dataImg,

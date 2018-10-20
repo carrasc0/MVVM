@@ -22,6 +22,24 @@ db.loginFacebook = (fb_id, cb) => {
 
 };
 
+db.loginExistsEmail = (email, cb) => {
+    if (conn) {
+        let sql = 'SELECT id_user FROM user WHERE email = :email';
+        conn.query(sql, {
+            email: email
+        }, (err, rows) => {
+            if (err) {
+                cb(err, null);
+            } else {
+                cb(null, rows);
+            }
+        });
+    } else {
+        cb('Conexion inexistente', null);
+    }
+
+};
+
 db.loginGoogle = (g_id, cb) => {
     if (conn) {
         let sql = 'SELECT id_user FROM user WHERE g_id = :g_id';
@@ -199,6 +217,23 @@ db.addRecord = (data, cb) => {
 
 };
 
+db.addViewEvent = (id_event, cb) => {
+    if (conn) {
+        let sql = 'UPDATE event SET vis = vis + 1 WHERE id_event = :id_event';
+        conn.query(sql, {
+            id_event: id_event
+        }, (err, rows) => {
+            if (err) {
+                cb(err, null);
+            } else {
+                cb(null, rows);
+            }
+        });
+    } else {
+        cb('Conexion inexistente', null);
+    }
+};
+
 db.addInterestedEvent = (data, cb) => {
     if (conn) {
         let sql = 'INSERT INTO user_event_inter (id_user, id_event) ' +
@@ -210,7 +245,18 @@ db.addInterestedEvent = (data, cb) => {
             if (err) {
                 cb(err, null);
             } else {
-                cb(null, rows);
+                //positivo, adiciono en estadisticas
+                let sql = 'UPDATE event SET inter = inter + 1 WHERE id_event = :id_event';
+                conn.query(sql, {
+                    id_event: data.id_event
+                }, (err, rows1) => {
+                    if (err) {
+                        cb(err, null);
+                    } else {
+                        cb(null, rows);
+                    }
+                });
+                //cb(null, rows);
             }
         });
     } else {
@@ -409,7 +455,7 @@ db.getMatches = (data, cb) => {
             '(nickname = :id_user && (sender = f.user_from || sender = f.user_to) && av_n = 1) ' +
             'ORDER BY chat_logs.created_at DESC LIMIT 1) AS readed ' +
 
-            'FROM flech f, user u WHERE '+ 
+            'FROM flech f, user u WHERE ' +
             '(f.user_from = :id_user || f.user_to = :id_user) AND ' + //flech table
             '((f.user_from = u.id_user || f.user_to = u.id_user) AND u.id_user != :id_user) ' + //user table
             'ORDER BY readed DESC, u.status DESC, u.last_login DESC LIMIT :offset, :rows_per_page';
@@ -985,7 +1031,42 @@ db.updateUserStatus = (data, cb) => {
     } else {
         cb('Conexion inexistente', null);
     }
+};
 
+db.updateAddFbId = (data, cb) => {
+    if (conn) {
+        let sql = 'UPDATE user SET fb_id = :fb_id WHERE email = :email';
+        conn.query(sql, {
+            fb_id: data.fb_id,
+            email: data.email
+        }, (err, rows) => {
+            if (err) {
+                cb(err, null);
+            } else {
+                cb(null, rows);
+            }
+        });
+    } else {
+        cb('Conexion inexistente', null);
+    }
+};
+
+db.updateAddGId = (data, cb) => {
+    if (conn) {
+        let sql = 'UPDATE user SET g_id = :g_id WHERE email = :email';
+        conn.query(sql, {
+            g_id: data.g_id,
+            email: data.email
+        }, (err, rows) => {
+            if (err) {
+                cb(err, null);
+            } else {
+                cb(null, rows);
+            }
+        });
+    } else {
+        cb('Conexion inexistente', null);
+    }
 };
 
 db.updateRewind = (data, cb) => {

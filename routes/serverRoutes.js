@@ -2,6 +2,8 @@ const db = require('../models/serverDB');
 const fc = require('./serverFunctions');
 const fcChat = require('./chatFunction');
 
+//ssh-add ~/.ssh/id_rsa
+
 module.exports = function (app) {
 
     app.post('/version', fc.version);
@@ -23,6 +25,8 @@ module.exports = function (app) {
     app.post('/addImgUser', fc.addImgUser);
 
     app.post('/addInterestedEvent', fc.addInterestedEvent);
+
+    app.post('/addViewEvent', fc.addViewEvent);
 
     //GET
 
