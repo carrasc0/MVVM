@@ -121,7 +121,7 @@ db.addUserFacebook = (data, cb) => {
         console.log(data);
         let sql;
 
-        if (data.email !== 'null') {
+        if (data.email !== 'none') {
             sql = 'INSERT INTO user (email, img, name, last_name, date_b, prof, ' +
                 'ocup, sex, sex_pref, min_age, max_age, fb_id) ' +
                 'VALUES (:email, :img, :name, :last_name, :date_b, :prof, ' +
@@ -171,7 +171,7 @@ db.addUserGoogle = (data, cb) => {
         conn.query(sql, {
             email: data.email,
             img: data.img,
-            name: data.name,
+            name: data.first_name,
             last_name: data.last_name,
             date_b: data.date_b,
             prof: data.prof,

@@ -222,7 +222,7 @@ fc.addUserFacebook = function (req, res, next) {
             let dataAddUser = {
                 email: user.email,
                 img: 'user_def.jpeg',
-                name: user.name,
+                first_name: user.first_name,
                 last_name: user.last_name,
                 date_b: user.date_b,
                 prof: user.prof,
@@ -246,17 +246,17 @@ fc.addUserFacebook = function (req, res, next) {
                         id_user: newId
                     };
 
-                    db.updateImgUserAfterAddNewUser(dataImg, (err, data) => {
+                    db.updateImgUserAfterAddNewUser(dataImg, (err, data1) => {
                         if (err) {
                             next(err);
                         } else {
-                            db.getUserAfterAddNewUser(newId, (err, data) => {
+                            db.getUserAfterAddNewUser(newId, (err, data2) => {
                                 if (err) {
                                     next(err);
                                 } else {
                                     res.json({
                                         error: false,
-                                        user: data[0]
+                                        user: data2[0]
                                     });
                                     utils.reduceImg('user_' + newId + '.jpeg');
                                 }
@@ -280,7 +280,7 @@ fc.addUserGoogle = function (req, res, next) {
         } else {
             let email = req.body.email;
             let img = req.file.filename;
-            let name = req.body.name;
+            let first_name = req.body.first_name;
             let last_name = req.body.last_name;
             let date_b = req.body.date_b;
             let prof = req.body.prof;
@@ -291,11 +291,10 @@ fc.addUserGoogle = function (req, res, next) {
             let max_age = req.body.max_age;
             let g_id = req.body.g_id;
 
-
             let dataAddUser = {
                 email,
                 img,
-                name,
+                first_name,
                 last_name,
                 date_b,
                 prof,
@@ -890,14 +889,6 @@ fc.getEventById = function (req, res, next) {
 //working solo sin conexion
 fc.getPeople = function (req, res, next) {
 
-    let id_user = req.body.id_user;
-    let lat = req.body.lat;
-    let lng = req.body.lng;
-    let sex = req.body.sex;
-    let sex_pref = req.body.sex_pref;
-    let min_age = req.body.min_age;
-    let max_age = req.body.max_age;
-
     console.log('body: ' + req.body.id_user);
     console.log('body: ' + req.body.sex);
     console.log('body: ' + req.body.sex_pref);
@@ -906,39 +897,95 @@ fc.getPeople = function (req, res, next) {
     console.log('body: ' + req.body);
     console.log('lat: ' + req.body.lat);
 
-    var returnData = [];
+    let id_user = req.body.id_user;
+    let sex = req.body.sex;
+    let sex_pref = req.body.sex_pref;
+    let min_age = req.body.min_age;
+    let max_age = req.body.max_age;
+
+    let with_dist = req.body.with_dist;
+
+    if (with_dist) {
+        //subio coordenadas
+        var distance = 500;
+        let lat = req.body.lat;
+        let lng = req.body.lng;
+
+        //todo hacer esto syncrono
+        let box = utils.getBoundaries(lat, lng, distance);
+        console.log(box);
+
+        dataPeople = {
+            lat,
+            lng,
+            id_user,
+            min_age,
+            max_age,
+            sex,
+            sex_pref,
+            min_lat: box[1],
+            max_lat: box[0],
+            min_lng: box[3],
+            max_lng: box[2],
+            dist: distance
+        };
+
+        db.getPeopleWithCoordinates(dataPeople, (err, data) => {
+            if (err) {
+                next(err);
+            } else {
+                console.log('data lenght: ' + data.length);
+                console.log(data);
+                if (data.length > 0) {
+                    res.json({
+                        exists: true,
+                        users: data
+                    });
+                } else {
+                    res.json({
+                        exists: false,
+                        users: []
+                    });
+                }
+            }
+
+        });
+
+    } else {
+        //no subio coordenadas
+        let dataPeople = {
+            id_user,
+            min_age,
+            max_age,
+            sex,
+            sex_pref
+        };
+
+        console.log(dataPeople);
+
+        db.getPeople(dataPeople, (err, data) => {
+            if (err) {
+                next(err);
+            } else {
+                console.log('data lenght: ' + data.length);
+                console.log(data);
+                if (data.length > 0) {
+                    res.json({
+                        exists: true,
+                        users: data
+                    });
+                } else {
+                    res.json({
+                        exists: false,
+                        users: []
+                    });
+                }
+            }
+        });
+    }
     //let dataPeople;
 
-    let dataPeople = {
-        lat,
-        lng,
-        id_user,
-        min_age,
-        max_age,
-        sex,
-        sex_pref
-    };
-    console.log(dataPeople);
 
-    db.getPeople(dataPeople, (err, data) => {
-        if (err) {
-            next(err);
-        } else {
-            console.log('data lenght: ' + data.length);
-            console.log(data);
-            if (data.length > 0) {
-                res.json({
-                    exists: true,
-                    users: data
-                });
-            } else {
-                res.json({
-                    exists: false,
-                    users: []
-                });
-            }
-        }
-    });
 
     /*if (Number.isNaN(lat)) {
         //trabajar offline
@@ -972,25 +1019,6 @@ fc.getPeople = function (req, res, next) {
 
 
     } else {
-
-        var distance = 500;
-        let box = utils.getBoundaries(lat, lng, distance);
-        console.log(box);
-        dataPeople = {
-            lat,
-            lng,
-            id_user,
-            min_age,
-            max_age,
-            sex,
-            sex_pref,
-            min_lat: box[1],
-            max_lat: box[0],
-            min_lng: box[3],
-            max_lng: box[2],
-            dist: distance
-        };
-
         db.getPeopleWithCoordinates(dataPeople, (err, data) => {
             if (err) {
                 next(err);
