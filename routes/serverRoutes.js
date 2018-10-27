@@ -28,6 +28,8 @@ module.exports = function (app) {
 
     app.post('/addViewEvent', fc.addViewEvent);
 
+    app.post('/addViewPromo', fc.addViewPromo);
+
     //GET
 
     app.post('/getMatches', fc.getMatches);
@@ -42,6 +44,8 @@ module.exports = function (app) {
 
     app.post('/getEventById', fc.getEventById);
 
+    app.post('/getPromoById', fc.getPromoById);
+
     app.post('/getPeople', fc.getPeople);
 
     app.post('/getImgsUser', fc.getImgsUser);
@@ -50,7 +54,11 @@ module.exports = function (app) {
 
     app.post('/getMatchesInviteEvent', fc.getMatchesInviteEvent);
 
+    app.post('/getMatchesInvitePromo', fc.getMatchesInvitePromo);
+
     app.post('/inviteUsers', fc.inviteUsers);
+
+    app.post('/sharePromo', fc.sharePromo);
 
     //UPDATE
 

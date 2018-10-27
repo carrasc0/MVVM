@@ -234,6 +234,23 @@ db.addViewEvent = (id_event, cb) => {
     }
 };
 
+db.addViewPromo = (id_event, cb) => {
+    if (conn) {
+        let sql = 'UPDATE promo SET vis = vis + 1 WHERE id_promo = :id_promo';
+        conn.query(sql, {
+            id_promo: id_promo
+        }, (err, rows) => {
+            if (err) {
+                cb(err, null);
+            } else {
+                cb(null, rows);
+            }
+        });
+    } else {
+        cb('Conexion inexistente', null);
+    }
+};
+
 db.addInterestedEvent = (data, cb) => {
     if (conn) {
         let sql = 'INSERT INTO user_event_inter (id_user, id_event) ' +
@@ -689,6 +706,28 @@ db.getEventById = (data, cb) => {
 
 };
 
+db.getPromoById = (id_promo, cb) => {
+
+    if (conn) {
+        let sql = 'SELECT id_promo, created_at, hor, img, name, cat, body, ' +
+            'location, vis, share ' +
+            'FROM promo WHERE id_promo = :id_promo';
+        conn.query(sql, {
+            id_promo: id_promo
+        }, (err, rows) => {
+            if (err) {
+                cb(err, null);
+            } else {
+                cb(null, rows);
+            }
+        });
+    } else {
+        cb('Conexion inexistente', null);
+    }
+
+
+};
+
 db.getImgsEventsByIdEvent = (id_event, cb) => {
 
     if (conn) {
@@ -974,6 +1013,30 @@ db.getMatchesParaInviteEvent = (data, cb) => {
             if (err) {
                 cb(err, null);
             } else {
+                cb(null, rows);
+            }
+        });
+    } else {
+        cb('Conexion inexistente', null);
+    }
+
+};
+
+db.getMatchesParaInvitePromo = (data, cb) => {
+
+    if (conn) {
+        let sql = 'SELECT DISTINCT u.id_user, u.img, u.name, TIMESTAMPDIFF(YEAR,u.date_b,CURDATE()) AS age ' +
+            'FROM user u, flech f ' +
+            'WHERE ((f.user_from = :id_user && f.user_to = u.id_user) OR (f.user_from = u.id_user && f.user_to = :id_user)) ' +
+            'AND u.id_user != ALL(SELECT user_to FROM share WHERE user_from = :id_user AND id_promo = :id_promo)';
+        conn.query(sql, {
+            id_user: data.id_user,
+            id_promo: data.id_promo
+        }, (err, rows) => {
+            if (err) {
+                cb(err, null);
+            } else {
+                console.log(rows);
                 cb(null, rows);
             }
         });
@@ -1285,6 +1348,36 @@ db.inviteUsers = (data, cb) => {
                 'VALUES (:id_event, :user_from, :user_to)';
             conn.query(sql, {
                 id_event: data.id_event,
+                user_from: data.id_user,
+                user_to: id_user
+            }, (err, rows) => {
+                if (err) {
+                    cb(err, null);
+                }
+            });
+        } else {
+            cb('Conexion inexistente', null);
+        }
+
+    });
+    cb(null, false);
+};
+
+db.sharePromo = (data, cb) => {
+
+    let users = data.users;
+    let aux = users.split(',');
+
+    console.log(users);
+    console.log(aux);
+
+    aux.forEach(id_user => {
+
+        if (conn) {
+            let sql = 'INSERT INTO share (id_promo, user_from, user_to) ' +
+                'VALUES (:id_promo, :user_from, :user_to)';
+            conn.query(sql, {
+                id_promo: data.id_promo,
                 user_from: data.id_user,
                 user_to: id_user
             }, (err, rows) => {

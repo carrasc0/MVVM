@@ -372,6 +372,22 @@ fc.addViewEvent = function (req, res, next) {
 
 };
 
+fc.addViewPromo = function (req, res, next) {
+
+    let id_promo = req.body.id_promo;
+
+    db.addViewPromo(id_promo, (err, rows) => {
+        if (err) {
+            next(err);
+        } else {
+            res.json({
+                error: false
+            });
+        }
+    });
+
+};
+
 fc.addInterestedEvent = function (req, res, next) {
 
     let id_user = req.body.id_user;
@@ -886,6 +902,24 @@ fc.getEventById = function (req, res, next) {
 
 };
 
+fc.getPromoById = function (req, res, next) {
+
+    let id_promo = req.body.id_promo;
+
+    //evento
+    db.getPromoById(id_promo, (err, data) => {
+        if (err) {
+            next(err);
+        } else {
+            res.json({
+                promo: data[0]
+            });
+        }
+
+    });
+
+};
+
 //working solo sin conexion
 fc.getPeople = function (req, res, next) {
 
@@ -1120,6 +1154,33 @@ fc.getMatchesInviteEvent = function (req, res, next) {
 
 };
 
+fc.getMatchesInvitePromo = function (req, res, next) {
+
+    console.log(req.body);
+
+    let id_user = req.body.id_user;
+    let id_promo = req.body.id_promo;
+
+    let dataGetMatches = {
+        id_user,
+        id_promo
+    };
+
+    db.getMatchesParaInvitePromo(dataGetMatches, (err, data) => {
+        if (err) {
+            next(err);
+        } else {
+            console.log(data);
+            res.json({
+                exists: true,
+                users: data
+            });
+        }
+
+    });
+
+};
+
 //working
 fc.inviteUsers = function (req, res, next) {
 
@@ -1134,6 +1195,31 @@ fc.inviteUsers = function (req, res, next) {
     };
 
     db.inviteUsers(dataInvite, (err, data) => {
+        if (err) {
+            next(err);
+        } else {
+            res.json({
+                error: false
+            });
+        }
+
+    });
+
+};
+
+fc.sharePromo = function (req, res, next) {
+
+    let id_user = req.body.id_user;
+    let id_promo = req.body.id_promo;
+    let users = req.body.users;
+
+    let dataShare = {
+        id_user,
+        id_promo,
+        users
+    };
+
+    db.sharePromo(dataShare, (err, data) => {
         if (err) {
             next(err);
         } else {
