@@ -1398,9 +1398,9 @@ db.sharePromo = (data, cb) => {
 db.openTalk = (data, cb) => {
 
     if (conn) {
-        let sql = 'SELECT id_chat, created_at, sender, nickname, body, readed FROM chat_logs ' +
+        let sql = 'SELECT id, created_at, sender, nickname, body FROM chat_logs ' +
             /*Si el mensaje lo envia el usuario actual, se verifica la disponibilidad*/
-            'WHERE (sender = :sender && nickname = :nickname && av_s = 1) OR ' +
+            'WHERE (sender = :sender && nickname = :nickname) OR ' +
             /*Si el mensaje ha sido enviado al usuario actual, no se verifica la disponibilidad*/
             '(sender = :nickname && nickname = :sender) LIMIT 40';
         conn.query(sql, {

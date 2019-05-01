@@ -28,14 +28,6 @@ fcChat.openTalk = function (req, res, next) {
         if (err) {
             next(err);
         } else {
-            //let datos1 = JSON.stringify(data);
-            //let datos = JSON.parse(datos1);
-            //console.log(datos);
-            //console.log(datos.length);
-            //console.log(Number(datos.lenght));
-            //console.log(parseInt(datos.lenght));
-            //console.log(data.lenght);
-            //console.log(parseInt(data.lenght));
             //console.log(data);
             if (data.length !== 0) {
                 console.log('existe');
@@ -45,14 +37,15 @@ fcChat.openTalk = function (req, res, next) {
                 });
                 console.log(data);
                 res.json({
-                    exists: true,
-                    msgs: data
+                    success: true,
+                    message: "Existen registros",
+                    messages: data
                 });
             } else {
                 console.log('no existe');
                 res.json({
-                    exists: false,
-                    msgs: []
+                    success: false,
+                    message: "Existen registros"
                 });
             }
         }

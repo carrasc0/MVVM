@@ -1,8 +1,8 @@
 const dbConnectionConfig = {
     host: '127.0.0.1',
     user: 'admin',
-    password: 'admin',
-    database: 'db_flech',
+    password: 'l0l1t4',
+    database: 'chat_db',
     port: '3306'
 };
 let mysql = require('mysql');
