@@ -1,6 +1,6 @@
 const dbConnectionConfig = {
     host: '127.0.0.1',
-    user: 'gbc',
+    user: 'admin',
     password: 'l0l1t4',
     database: 'chat_db',
     port: '3306'
