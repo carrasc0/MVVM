@@ -216,8 +216,8 @@ db.disableAvNickname = (id_chat, cb) => {
 };
 
 db.addNewMsg = (data, cb) => {
-
     if (conn) {
+        console.log("new msg");
         let sql = 'INSERT INTO chat_logs (sender, nickname, body) VALUES ' +
             /*Insertando mensaje*/
             '(:sender, :nickname, :body)';
@@ -241,9 +241,9 @@ db.addNewMsg = (data, cb) => {
 db.getMsgById = (id_chat, cb) => {
 
     if (conn) {
-        let sql = 'SELECT id_chat, created_at, sender, nickname, body FROM chat_logs ' +
+        let sql = 'SELECT id, created_at, sender, nickname, body FROM chat_logs ' +
             /*Total de mensajes sin leer del usuario para la bottom bar*/
-            'WHERE id_chat = :id_chat';
+            'WHERE id = :id_chat';
         conn.query(sql, {
             id_chat: id_chat
         }, (err, rows) => {

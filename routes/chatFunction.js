@@ -277,7 +277,7 @@ fcChat.removeConversation = function (data, socket, next) {
 
 };
 
-fcChat.addNewMsg = function (data, socket, next) {
+fcChat.sendNewMsg = function (data, socket, next) {
 
     //let params = JSON.stringify(data.params);
     let sender = data.sender;

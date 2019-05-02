@@ -34,8 +34,8 @@ module.exports = function (io) {
         console.log("SOCKET ID : " + socket.id);
 
         socket.on('func', function (data, fn) {
-            chF[data.fn](data.params, socket, fn);
             console.log('funciones' + data);
+            chF[data.fn](data.params, socket, fn);
         });
         socket.on('/newMsg', function (data, fn) {
             chF.addNewMsg(data.params, socket, fn);
