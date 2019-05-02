@@ -4,7 +4,7 @@ let db = {};
 
 //CHAT
 
-db.openTalk = (data, cb) => {
+db.getMessages = (data, cb) => {
 
     if (conn) {
         let sql = 'SELECT id, created_at, sender, nickname, body FROM chat_logs ' +
@@ -28,14 +28,14 @@ db.openTalk = (data, cb) => {
 
 };
 
-db.upChatScroll = (data, cb) => {
+db.getMoreMessages = (data, cb) => {
 
     if (conn) {
-        let sql = 'SELECT id_chat, created_at, date, sender, nickname, body, readed FROM chat_logs ' +
+        let sql = 'SELECT id, created_at, readed, date, sender, nickname, body  FROM chat_logs ' +
             /*Si el mensaje lo envia el usuario actual, se verifica la disponibilidad*/
-            'WHERE ((sender = :sender && nickname = :nickname && av_s = 1) OR' +
+            'WHERE ((sender = :sender && nickname = :nickname) OR' +
             /*Si el mensaje ha sido enviado al usuario actual, no se verifica la disponibilidad*/
-            '(sender = :nickname && nickname = :sender)) AND (id_chat > :id_chat) LIMIT 40';
+            '(sender = :nickname && nickname = :sender)) AND (id > :id_chat) LIMIT 40';
         conn.query(sql, {
             sender: data.sender,
             nickname: data.nickname,
@@ -53,14 +53,14 @@ db.upChatScroll = (data, cb) => {
 
 };
 
-db.existsMoreMsgs = (data, cb) => {
+db.existMoreMessages = (data, cb) => {
 
     if (conn) {
         let sql = 'SELECT COUNT(*) as count FROM chat_logs ' +
             /*Si el mensaje lo envia el usuario actual, se verifica la disponibilidad*/
-            'WHERE ((sender = :sender && nickname = :nickname && av_s = 1) OR' +
+            'WHERE ((sender = :sender && nickname = :nickname) OR' +
             /*Si el mensaje ha sido enviado al usuario actual, no se verifica la disponibilidad*/
-            '(sender = :nickname && nickname = :sender)) AND id_chat > :id_chat LIMIT 40';
+            '(sender = :nickname && nickname = :sender)) AND id > :id_chat LIMIT 40';
         conn.query(sql, {
             sender: data.sender,
             nickname: data.nickname,
@@ -121,101 +121,7 @@ db.getMsgsWithoutReadBetweenTwoUsers = (data, cb) => {
 
 };
 
-db.removeMsg = (data, cb) => {
-
-    if (conn) {
-        let sql = 'UPDATE FROM chat_logs ' +
-            /*Deshabilitar msg enviado siempre por sender*/
-            'WHERE ' +
-            '' +
-            /*Si el mensaje ha sido enviado al usuario actual, no se verifica la disponibilidad*/
-            '(sender = :nickname && nickname = :sender)) AND id_chat > :id_chat LIMIT 40';
-        conn.query(sql, {
-            sender: data.sender,
-            nickname: data.nickname,
-            id_chat: data.id_chat
-        }, (err, rows) => {
-            if (err) {
-                cb(err, null);
-            } else {
-                cb(null, rows);
-            }
-        });
-    } else {
-        cb('Conexion inexistente', null);
-    }
-
-};
-
-db.removeMsgs = (data, cb) => {
-
-    if (conn) {
-        let sql = 'UPDATE FROM chat_logs ' +
-            /*Deshabilitar msg enviado siempre por sender*/
-            'WHERE ' +
-            '' +
-            /*Si el mensaje ha sido enviado al usuario actual, no se verifica la disponibilidad*/
-            '(sender = :nickname && nickname = :sender)) AND id_chat > :id_chat LIMIT 40';
-        conn.query(sql, {
-            sender: data.sender,
-            nickname: data.nickname,
-            id_chat: data.id_chat
-        }, (err, rows) => {
-            if (err) {
-                cb(err, null);
-            } else {
-                cb(null, rows);
-            }
-        });
-    } else {
-        cb('Conexion inexistente', null);
-    }
-
-};
-
-db.disableAvSender = (id_chat, cb) => {
-
-    if (conn) {
-        let sql = 'UPDATE FROM chat_logs SET av_s = 0 ' +
-            /*Deshabilitar msg enviado para senderr*/
-            'WHERE id_chat = :id_chat';
-        conn.query(sql, {
-            id_chat: id_chat
-        }, (err, rows) => {
-            if (err) {
-                cb(err, null);
-            } else {
-                cb(null, rows);
-            }
-        });
-    } else {
-        cb('Conexion inexistente', null);
-    }
-
-};
-
-db.disableAvNickname = (id_chat, cb) => {
-
-    if (conn) {
-        let sql = 'UPDATE FROM chat_logs SET av_n = 0 ' +
-            /*Deshabilitar msg enviado para senderr*/
-            'WHERE id_chat = :id_chat';
-        conn.query(sql, {
-            id_chat: id_chat
-        }, (err, rows) => {
-            if (err) {
-                cb(err, null);
-            } else {
-                cb(null, rows);
-            }
-        });
-    } else {
-        cb('Conexion inexistente', null);
-    }
-
-};
-
-db.addNewMsg = (data, cb) => {
+db.newMessage = (data, cb) => {
     if (conn) {
         console.log("new msg");
         let sql = 'INSERT INTO chat_logs (sender, nickname, body) VALUES ' +
@@ -238,7 +144,7 @@ db.addNewMsg = (data, cb) => {
 
 };
 
-db.getMsgById = (id_chat, cb) => {
+db.getMessageById = (id_chat, cb) => {
 
     if (conn) {
         let sql = 'SELECT id, created_at, sender, nickname, body FROM chat_logs ' +
