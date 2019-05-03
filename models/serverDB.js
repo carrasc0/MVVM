@@ -78,7 +78,7 @@ db.existMoreMessages = (data, cb) => {
 
 };
 
-db.getMsgsWithoutReadForSender = (sender, cb) => {
+db.getMessagesWithoutReadForSender = (sender, cb) => {
 
     if (conn) {
         let sql = 'SELECT COUNT(*) as count FROM chat_logs ' +
@@ -99,7 +99,7 @@ db.getMsgsWithoutReadForSender = (sender, cb) => {
 
 };
 
-db.getMsgsWithoutReadBetweenTwoUsers = (data, cb) => {
+db.getMessagesWithoutReadBetweenTwoUsers = (data, cb) => {
 
     if (conn) {
         let sql = 'SELECT COUNT(*) as count FROM chat_logs ' +

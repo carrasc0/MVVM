@@ -160,10 +160,16 @@ fcChat.newMessage = function (data, socket, next) {
                 if (err) {
                     next(err);
                 } else {
+                    console.log("before emit");
                     console.log(data);
                     //next(data);
-                    socket.to(nickname).emit("recNewMsg", data);
-                    socket.to(sender).emit("addNewMsg", data);
+                    //socket.to(nickname).emit("newMessage", data);
+                    //socket.to(sender).emit("newMessage", data);
+                    let message  = {
+                              data
+                    }
+                    
+                    socket.emit("newMessage", message);
                 }
             });
         }
@@ -175,7 +181,7 @@ fcChat.getMessagesWithoutReadForSender = function (data, socket, next) {
     let params = JSON.stringify(data.params);
     let sender = params.sender;
 
-    db.getMsgsWithoutReadForSender(sender, (err, data) => {
+    db.getMessagesWithoutReadForSender(sender, (err, data) => {
         if (err) {
             next(err);
         } else {
@@ -197,7 +203,7 @@ fcChat.getMessagesWithoutReadBetweenTwoUsers = function (data, socket, next) {
         sender,
         nickname
     };
-    db.getMsgsWithoutReadBetweenTwoUsers(dataBetween, (err, data) => {
+    db.getMessagesWithoutReadBetweenTwoUsers(dataBetween, (err, data) => {
         if (err) {
             next(err);
         } else {
