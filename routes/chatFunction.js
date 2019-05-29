@@ -166,10 +166,13 @@ fcChat.newMessage = function (data, socket, next) {
                     //socket.to(nickname).emit("newMessage", data);
                     //socket.to(sender).emit("newMessage", data);
                     let message  = {
-                              data
+                              sender: data[0].sender,
+                              nickname: data[0].nickname,
+                              body: data[0].body
                     }
-                    
                     socket.emit("newMessage", message);
+                    //socket.to(data[0].sender).emit("newMessage", message)
+                    //socket.to(data[0].nickname).emit("newMessage", message)
                 }
             });
         }
