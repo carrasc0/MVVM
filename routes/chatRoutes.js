@@ -9,11 +9,14 @@ module.exports = function (io) {
         console.log('extra:', handshakeData.extra);
 
         socket.id = handshakeData._query.userID;
-        console.log("SOCKET ID : " + socket.id);
+
+        console.log("SOCKET ID : " + socket);
+        console.log("SOCKET chat : " + chatSocket);
 
         socket.on('func', function (data, fn) {
             console.log('funciones' + data);
-            chatFunction[data.fn](data.params, socket, fn);
+            //chatFunction[data.fn](data.params, socket, fn);
+            chatFunction[data.fn](data.params, chatSocket, fn);
         });
 
         socket.on('typing', function (data, fn){
@@ -24,7 +27,10 @@ module.exports = function (io) {
                typing: data.typing
             };
             console.log('before emit typing', dataTyping)
-            socket.emit('typing', dataTyping)
+            chatSocket.emit('typing', dataTyping)
+            //socket.broadcast.to(data.sender).emit('typing', dataTyping)
+            //socket.to(data.sender).emit('typing', dataTyping)
+            //socket.to(data.nickname).emit('typing', dataTyping)
         });
     });
 };
